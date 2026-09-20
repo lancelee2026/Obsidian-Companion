@@ -1,6 +1,16 @@
 import {Plugin, Notice, Modal, Setting, App, PluginSettingTab} from "obsidian";
-import {startCompanion, type CompanionServer} from "./index";
+import {
+  createMemoryPairingStore,
+  isStoredClient,
+  startCompanion,
+  type CompanionServer,
+  type StoredClient
+} from "./index";
 import type {ObsidianAppLike} from "./vault/obsidian";
+
+type PluginData = {
+  clients?: StoredClient[];
+};
 
 /**
  * Obsidian entry. Bundled separately as main.js for the Community Plugin layout.
@@ -13,21 +23,35 @@ export default class NoteFerryCompanionPlugin extends Plugin {
       id: "noteferry-revoke-browser",
       name: "NoteFerry: Disconnect browser access",
       callback: () => {
-        // Revocation of the active client happens via DELETE from the extension.
-        // This command shows recovery copy only.
-        new Notice("Open the NoteFerry browser extension and disconnect if needed.");
+        void this.revokeAllClients();
       }
     });
 
     try {
+      const data = (await this.loadData()) as PluginData | null;
+      const initialClients = Array.isArray(data?.clients)
+        ? data.clients.filter(isStoredClient)
+        : [];
+      const pairing = createMemoryPairingStore(Date.now, {
+        initialClients,
+        persistClients: (clients) => {
+          void this.saveData({clients} satisfies PluginData);
+        }
+      });
+
       this.server = await startCompanion(this.app as unknown as ObsidianAppLike, {
+        pairing,
         onPairRequested: (requestId, clientName, actions) => {
           const modal = new PairRequestModal(this.app, clientName, actions);
           modal.open();
           void requestId;
         }
       });
-      new Notice("NoteFerry is ready to connect from your browser.");
+      new Notice(
+        initialClients.length > 0
+          ? "NoteFerry is ready. Your browser stays connected."
+          : "NoteFerry is ready to connect from your browser."
+      );
     } catch {
       new Notice("NoteFerry could not start. Quit other copies of Obsidian and try again.");
     }
@@ -38,6 +62,21 @@ export default class NoteFerryCompanionPlugin extends Plugin {
   override async onunload(): Promise<void> {
     await this.server?.stop();
     this.server = null;
+  }
+
+  async revokeAllClients(): Promise<void> {
+    const pairing = this.server?.pairing;
+    if (!pairing) {
+      new Notice("NoteFerry is not running.");
+      return;
+    }
+    const data = (await this.loadData()) as PluginData | null;
+    const clients = Array.isArray(data?.clients) ? data.clients : [];
+    for (const client of clients) {
+      if (isStoredClient(client)) pairing.revoke(client.clientId);
+    }
+    await this.saveData({clients: []} satisfies PluginData);
+    new Notice("NoteFerry browser access cleared. Pair again from the extension if needed.");
   }
 }
 
@@ -83,8 +122,15 @@ class NoteFerrySettingTab extends PluginSettingTab {
     containerEl.empty();
     containerEl.createEl("h2", {text: "NoteFerry"});
     containerEl.createEl("p", {
-      text: "Connect the NoteFerry browser extension, then approve access when prompted. Notes never leave this computer until you attach them to an AI chat."
+      text: "Connect the NoteFerry browser extension once. After you Allow access, the connection stays until you disconnect. Notes never leave this computer until you attach them to an AI chat."
     });
-    void this.plugin;
+    new Setting(containerEl)
+      .setName("Browser access")
+      .setDesc("Clear saved browser pairing on this computer.")
+      .addButton((button) =>
+        button.setButtonText("Disconnect browser").setWarning().onClick(() => {
+          void this.plugin.revokeAllClients().then(() => this.display());
+        })
+      );
   }
 }

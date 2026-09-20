@@ -2,7 +2,7 @@
 
 ## Snapshot
 
-- **Implemented:** loopback HTTP server, memory pairing store (hash-only secrets), FakeVault tests, Obsidian vault adapter, plugin shell with Allow/Deny pairing UI, esbuild `dist/main.js` + `manifest.json`.
+- **Implemented:** loopback HTTP server, pairing store with durable approved-client hashes (pending requests stay in memory), FakeVault tests, Obsidian vault adapter, plugin shell with Allow/Deny pairing UI, esbuild `dist/main.js` + `manifest.json`.
 - **Proposed:** deeper Obsidian packaging UX polish, store listing assets.
 - **Unverified:** live Obsidian Desktop on macOS/Windows, real-vault path edge cases beyond unit fixtures.
 

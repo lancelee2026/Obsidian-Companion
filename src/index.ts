@@ -4,7 +4,8 @@ import {
   createMemoryPairingStore,
   hashSecret,
   normalizeVaultRelativePath,
-  statusResponse
+  statusResponse,
+  type PairingStore
 } from "./core";
 import {createCompanionServer, type CompanionServer} from "./server/http";
 import {FakeVault} from "./vault/fake";
@@ -13,10 +14,12 @@ import {ObsidianVaultAdapter, type ObsidianAppLike} from "./vault/obsidian";
 export {
   createMemoryPairingStore,
   hashSecret,
+  isStoredClient,
   normalizeVaultRelativePath,
   statusResponse,
   SERVICE_VERSION
 } from "./core";
+export type {PairingStore, PairingStoreOptions, StoredClient} from "./core";
 export {createCompanionServer} from "./server/http";
 export {FakeVault} from "./vault/fake";
 export {ObsidianVaultAdapter} from "./vault/obsidian";
@@ -37,6 +40,7 @@ export const companionStatusFixture = (serviceVersion: string): CompanionStatusR
 export async function startCompanion(
   app: ObsidianAppLike,
   options?: {
+    pairing?: PairingStore;
     onPairRequested?: (requestId: string, clientName: string, actions: {
       approve: () => void;
       deny: () => void;
@@ -46,6 +50,7 @@ export async function startCompanion(
   const vault = new ObsidianVaultAdapter(app);
   const server = createCompanionServer({
     vault,
+    ...(options?.pairing ? {pairing: options.pairing} : {}),
     onPairRequested: (requestId, clientName) => {
       options?.onPairRequested?.(requestId, clientName, {
         approve: () => {

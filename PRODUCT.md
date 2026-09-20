@@ -2,7 +2,7 @@
 
 ## What this is
 
-A thin Obsidian Desktop plugin that exposes a local, read-only vault service so the NoteFerry Chrome extension can list Current / Recent / Search notes, resolve included vs skipped attachments, and read chosen file bytes.
+A thin Obsidian Desktop plugin that exposes a local, read-only vault service so the NoteFerry Chrome extension can list Current / Recent / Search notes, optionally browse one folder at a time, resolve included vs skipped attachments, and read chosen file bytes.
 
 ## What this is not
 
@@ -24,9 +24,10 @@ People who keep notes in Obsidian Desktop on the same machine as Chrome, and use
 ## Capabilities (V1)
 
 - Status without vault metadata.
-- Short-lived pairing with one-time secret return; Companion stores hash only.
+- Short-lived pairing with one-time secret return; Companion stores hashes only and keeps approved clients across Obsidian restarts until the user disconnects.
 - Authenticated: session, current note, recent notes, filename/path search, context resolve, file read, client revoke.
-- Attachment classification: image/pdf included; audio/video/nested-md/unknown skipped with reasons.
+- **Proposed:** `POST /v1/folder/list` (one directory, containment-checked) and optional `attachmentCount` on note summaries from `metadataCache` embeds — so the extension can show counts before resolve. Not Local REST. Not an E2N folder IPC clone.
+- Attachment classification: image, pdf, and mp4/webm/mov video included; audio, nested-md, unknown, and other video skipped with reasons.
 
 ## Constraints
 

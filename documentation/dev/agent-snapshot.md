@@ -6,14 +6,14 @@ Read `PRODUCT.md`, `documentation/README.md`, `documentation/system-design.md`, 
 
 ## Status
 
-- `Implemented`: HTTP companion, pairing, vault ports, Obsidian plugin shell, protocol package, documentation set.
-- `Verified`: `pnpm build`, `pnpm typecheck`, `pnpm test` (path, pairing, status, resolve/read).
-- `Proposed`: Community Plugin listing polish, deeper packaging docs.
-- `Unverified`: live Obsidian Desktop pairing UX; macOS/Windows release packaging.
+- `Implemented`: HTTP companion, pairing with durable client-hash persistence, vault ports, Obsidian plugin shell, protocol package, documentation set.
+- `Verified`: `pnpm build`, `pnpm typecheck`, `pnpm test` (path, pairing + restore, status, resolve/read).
+- `Proposed`: Community Plugin listing polish, deeper packaging docs, `POST /v1/folder/list` + optional `attachmentCount` (NoteFerry Picker pack slice).
+- `Unverified`: live Obsidian Desktop restart self-heal after Allow; macOS/Windows release packaging.
 
 ## Next safe actions
 
-1. Load `dist/` into a real vault; pair with the noteferry extension popup.
+1. `pnpm build` writes `dist/` and copies `main.js` into the open vault plugin folder `Documents/Obsidian Vault/.obsidian/plugins/noteferry-companion` (pairing `data.json` is left untouched). Disable/enable the plugin in Obsidian after build.
 2. Record live evidence in `tests.md` only from observation.
 3. Keep protocol changes synchronized with [noteferry](https://github.com/lancelee2026/noteferry).
 

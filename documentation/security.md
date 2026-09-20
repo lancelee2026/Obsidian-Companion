@@ -10,7 +10,8 @@
 ## Pairing secrets
 
 - Generate high-entropy secrets.
-- Persist only SHA-256 hashes on the Companion side.
+- Persist only SHA-256 hashes on the Companion side (Obsidian `data.json` across restarts).
+- Pending Allow requests are short-lived and not persisted; approved clients are.
 - Return plaintext secret once at approval; never log it.
 - Compare hashes with timing-safe equality.
 

@@ -55,7 +55,9 @@ function mimeFor(path: string): string {
   if (lower.endsWith(".webp")) return "image/webp";
   if (lower.endsWith(".pdf")) return "application/pdf";
   if (lower.endsWith(".mp3")) return "audio/mpeg";
-  if (lower.endsWith(".mp4")) return "video/mp4";
+  if (lower.endsWith(".mp4") || lower.endsWith(".m4v")) return "video/mp4";
+  if (lower.endsWith(".webm")) return "video/webm";
+  if (lower.endsWith(".mov")) return "video/quicktime";
   if (lower.endsWith(".md")) return "text/markdown";
   return "application/octet-stream";
 }

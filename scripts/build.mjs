@@ -1,5 +1,7 @@
 import {build} from "esbuild";
 import {cp, mkdir, rm} from "node:fs/promises";
+import {existsSync} from "node:fs";
+import {join} from "node:path";
 
 await rm("dist", {recursive: true, force: true});
 await mkdir("dist", {recursive: true});
@@ -17,3 +19,12 @@ await build({
 });
 
 await cp("obsidian/manifest.json", "dist/manifest.json");
+
+const vaultPlugin = process.env.NOTEFERRY_VAULT_PLUGIN
+  ?? join(process.env.HOME ?? "", "Documents/Obsidian Vault/.obsidian/plugins/noteferry-companion");
+if (existsSync(vaultPlugin)) {
+  await cp("dist/main.js", join(vaultPlugin, "main.js"));
+  await cp("dist/main.js.map", join(vaultPlugin, "main.js.map"));
+  await cp("dist/manifest.json", join(vaultPlugin, "manifest.json"));
+  console.log(`installed to ${vaultPlugin}`);
+}

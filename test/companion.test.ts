@@ -103,6 +103,26 @@ describe("pairing store", () => {
     expect(hashSecret(result!.secret)).toMatch(/^[a-f0-9]{64}$/);
     expect(store.authenticate(`Bearer ${result!.secret}x`)).toBeNull();
   });
+
+  it("restores approved clients across store recreations", () => {
+    let saved: import("../src/core").StoredClient[] = [];
+    const first = createMemoryPairingStore(() => 1_000_000, {
+      persistClients: (clients) => {
+        saved = clients;
+      }
+    });
+    const created = first.create({
+      clientName: "NoteFerry",
+      extensionVersion: "0.0.0",
+      protocolVersion: PROTOCOL_VERSION
+    });
+    const result = first.approve(created.requestId);
+    expect(result).toBeTruthy();
+    expect(saved).toHaveLength(1);
+
+    const second = createMemoryPairingStore(() => 2_000_000, {initialClients: saved});
+    expect(second.authenticate(`Bearer ${result!.secret}`)?.clientId).toBe(result!.clientId);
+  });
 });
 
 describe("companion http", () => {
@@ -169,7 +189,7 @@ describe("companion http", () => {
     expect(manifest.items.some((item) => item.displayName === "Project Alpha" && item.state === "included")).toBe(true);
     expect(manifest.items.some((item) => item.displayName === "img.png" && item.state === "included")).toBe(true);
     expect(manifest.items.some((item) => item.displayName === "paper.pdf" && item.state === "included")).toBe(true);
-    expect(manifest.items.some((item) => item.state === "skipped" && item.reason === "video-not-supported")).toBe(true);
+    expect(manifest.items.some((item) => item.displayName === "clip.mp4" && item.state === "included")).toBe(true);
     expect(manifest.items.some((item) => item.state === "skipped" && item.reason === "nested-note-not-expanded")).toBe(true);
 
     const file = await fetch(`${base}/v1/file/read`, {

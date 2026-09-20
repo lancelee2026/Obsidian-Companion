@@ -119,9 +119,44 @@ export type PendingPair = {
   result?: PairResult;
 };
 
-export function createMemoryPairingStore(now: () => number = Date.now): PairingStore {
+export type PairingStoreOptions = {
+  /** Restored approved clients (hashes only). Pending pair requests are never persisted. */
+  initialClients?: readonly StoredClient[];
+  /** Called after approve/revoke when the durable client set changes. */
+  persistClients?: (clients: StoredClient[]) => void;
+};
+
+export function isStoredClient(value: unknown): value is StoredClient {
+  if (!value || typeof value !== "object") return false;
+  const row = value as Record<string, unknown>;
+  return (
+    typeof row.clientId === "string" &&
+    typeof row.secretHash === "string" &&
+    /^[a-f0-9]{64}$/.test(row.secretHash) &&
+    typeof row.pairedAt === "string" &&
+    typeof row.lastSeenAt === "string" &&
+    isProtocolVersion(row.protocolVersion)
+  );
+}
+
+export function createMemoryPairingStore(
+  now: () => number = Date.now,
+  options: PairingStoreOptions = {}
+): PairingStore {
   const pending = new Map<string, PendingPair>();
   const clients = new Map<string, StoredClient>();
+
+  for (const client of options.initialClients ?? []) {
+    if (isStoredClient(client)) clients.set(client.clientId, {...client});
+  }
+
+  function snapshotClients(): StoredClient[] {
+    return [...clients.values()].map((client) => ({...client}));
+  }
+
+  function persist(): void {
+    options.persistClients?.(snapshotClients());
+  }
 
   function expire(entry: PendingPair): PairStatus {
     if (entry.state === "pending" && now() > entry.expiresAt) {
@@ -171,6 +206,7 @@ export function createMemoryPairingStore(now: () => number = Date.now): PairingS
         lastSeenAt: pairedAt,
         protocolVersion: entry.protocolVersion
       });
+      persist();
       return entry.result;
     },
     deny(requestId) {
@@ -209,7 +245,9 @@ export function createMemoryPairingStore(now: () => number = Date.now): PairingS
       return null;
     },
     revoke(clientId) {
-      return clients.delete(clientId);
+      const removed = clients.delete(clientId);
+      if (removed) persist();
+      return removed;
     },
     touch(clientId) {
       const client = clients.get(clientId);
@@ -228,9 +266,11 @@ export function classifyAttachment(path: string, mimeType?: string): VaultAttach
   return "other";
 }
 
-export function skipReason(kind: VaultAttachmentDescriptor["kind"]): string | undefined {
+export function skipReason(kind: VaultAttachmentDescriptor["kind"], name = ""): string | undefined {
   if (kind === "audio") return "audio-not-supported";
-  if (kind === "video") return "video-not-supported";
+  if (kind === "video") {
+    return /\.(mp4|m4v|webm|mov)$/i.test(name) ? undefined : "video-not-supported";
+  }
   if (kind === "nested-note") return "nested-note-not-expanded";
   if (kind === "other") return "unsupported-type";
   return undefined;
@@ -257,7 +297,7 @@ export async function resolveContext(
 
     for (const attachment of await vault.listAttachments(noteId)) {
       if (allow.size > 0 && !allow.has(attachment.id)) continue;
-      const reason = skipReason(attachment.kind);
+      const reason = skipReason(attachment.kind, attachment.displayName);
       const state = reason ? "skipped" : "included";
       const item = {
         id: attachment.id,
