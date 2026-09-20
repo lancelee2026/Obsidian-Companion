@@ -24,4 +24,6 @@ Vault data stays on this computer until you attach it. There is no NoteFerry acc
 
 Shares `@noteferry/protocol` with the extension repo. Keep versions aligned when changing endpoints.
 
+Technical SSOT for this repo: [`documentation/README.md`](documentation/README.md).
+
 Related: [noteferry](https://github.com/lancelee2026/noteferry) · [noteferry-landingpage](https://github.com/lancelee2026/noteferry-landingpage)
