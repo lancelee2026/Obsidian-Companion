@@ -3,7 +3,8 @@ import {PROTOCOL_VERSION} from "@noteferry/protocol";
 import {
   createMemoryPairingStore,
   hashSecret,
-  normalizeVaultRelativePath
+  normalizeVaultRelativePath,
+  normalizeFolderListPath
 } from "../src/core";
 import {createCompanionServer} from "../src/server/http";
 import {FakeVault} from "../src/vault/fake";
@@ -85,6 +86,9 @@ describe("path normalization", () => {
     expect(normalizeVaultRelativePath("C:\\\\Windows\\\\x")).toBeNull();
     expect(normalizeVaultRelativePath("notes/../alpha.md")).toBeNull();
     expect(normalizeVaultRelativePath("notes/alpha.md")).toBe("notes/alpha.md");
+    expect(normalizeFolderListPath("")).toBe("");
+    expect(normalizeFolderListPath("notes")).toBe("notes");
+    expect(normalizeFolderListPath("../secret")).toBeNull();
   });
 });
 
@@ -166,10 +170,46 @@ describe("companion http", () => {
     const auth = {Authorization: `Bearer ${pair.secret}`, "Content-Type": "application/json"};
 
     const current = await fetch(`${base}/v1/current`, {headers: auth});
-    expect((await current.json() as {title: string}).title).toBe("Project Alpha");
+    const currentBody = await current.json() as {title: string; attachmentCount?: number};
+    expect(currentBody.title).toBe("Project Alpha");
+    expect(currentBody.attachmentCount).toBe(4);
 
     const recent = await fetch(`${base}/v1/recent`, {headers: auth});
     expect(await recent.json()).toHaveLength(2);
+
+    const root = await fetch(`${base}/v1/folder/list`, {
+      method: "POST",
+      headers: auth,
+      body: JSON.stringify({vaultRelativePath: ""})
+    });
+    const rootBody = await root.json() as {
+      vaultRelativePath: string;
+      parentPath: string | null;
+      truncated: boolean;
+      entries: Array<{kind: string; name: string; vaultRelativePath: string}>;
+    };
+    expect(root.status).toBe(200);
+    expect(rootBody.vaultRelativePath).toBe("");
+    expect(rootBody.parentPath).toBeNull();
+    expect(rootBody.entries.some((entry) => entry.kind === "folder" && entry.vaultRelativePath === "notes")).toBe(true);
+
+    const notesFolder = await fetch(`${base}/v1/folder/list`, {
+      method: "POST",
+      headers: auth,
+      body: JSON.stringify({vaultRelativePath: "notes"})
+    });
+    const notesBody = await notesFolder.json() as {
+      entries: Array<{kind: string; name: string; note?: {attachmentCount?: number}}>;
+    };
+    expect(notesBody.entries.some((entry) => entry.kind === "note" && entry.name === "Project Alpha" && entry.note?.attachmentCount === 4)).toBe(true);
+
+    const traversalFolder = await fetch(`${base}/v1/folder/list`, {
+      method: "POST",
+      headers: auth,
+      body: JSON.stringify({vaultRelativePath: "../secret"})
+    });
+    expect(traversalFolder.status).toBe(400);
+    expect((await traversalFolder.json() as {error: {code: string}}).error.code).toBe("PATH_REJECTED");
 
     const search = await fetch(`${base}/v1/search`, {
       method: "POST",
@@ -222,5 +262,37 @@ describe("companion http", () => {
       })
     });
     expect([400, 413, 500]).toContain(response.status);
+  });
+});
+
+describe("folder list truncation", () => {
+  it("sets truncated when a folder has more notes than the show cap", async () => {
+    const notes = Array.from({length: 90}, (_, index) => ({
+      id: `bulk/note-${String(index).padStart(3, "0")}.md`,
+      vaultRelativePath: `bulk/note-${String(index).padStart(3, "0")}.md`,
+      title: `Note ${index}`,
+      modifiedAt: "2026-09-20T00:00:00.000Z",
+      markdown: "# n\n",
+      attachments: []
+    }));
+    const vault = new FakeVault(notes);
+    const server = createCompanionServer({vault, host: "127.0.0.1", port: 0});
+    const addr = await server.start();
+    const base = `http://${addr.host}:${addr.port}`;
+    try {
+      const pair = await pairedClient(base, (id) => {
+        server.pairing.approve(id);
+      });
+      const listed = await fetch(`${base}/v1/folder/list`, {
+        method: "POST",
+        headers: {Authorization: `Bearer ${pair.secret}`, "Content-Type": "application/json"},
+        body: JSON.stringify({vaultRelativePath: "bulk"})
+      });
+      const body = await listed.json() as {truncated: boolean; entries: unknown[]};
+      expect(body.truncated).toBe(true);
+      expect(body.entries.length).toBe(80);
+    } finally {
+      await server.stop();
+    }
   });
 });

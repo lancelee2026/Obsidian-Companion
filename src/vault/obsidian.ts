@@ -3,18 +3,36 @@
  * never import the Obsidian runtime.
  */
 import type {
+  FolderListRequest,
+  FolderListResponse,
+  FolderListEntry,
   SearchRequest,
   SearchResponse,
   VaultAttachmentDescriptor,
   VaultNoteSummary
 } from "@noteferry/protocol";
-import {classifyAttachment, normalizeVaultRelativePath, RECENT_LIMIT, type VaultPort} from "../core";
+import {
+  classifyAttachment,
+  FOLDER_LIST_SCAN_MAX,
+  FOLDER_LIST_SHOW_MAX,
+  normalizeFolderListPath,
+  normalizeVaultRelativePath,
+  parentFolderPath,
+  RECENT_LIMIT,
+  type VaultPort
+} from "../core";
 
 export type ObsidianTFile = {
   path: string;
   basename: string;
   extension: string;
   stat: {mtime: number; size: number};
+};
+
+export type ObsidianTFolder = {
+  path: string;
+  name: string;
+  children: Array<ObsidianTFile | ObsidianTFolder>;
 };
 
 export type ObsidianMetadataCache = {
@@ -25,7 +43,8 @@ export type ObsidianMetadataCache = {
 };
 
 export type ObsidianVaultApi = {
-  getAbstractFileByPath(path: string): ObsidianTFile | null;
+  getAbstractFileByPath(path: string): ObsidianTFile | ObsidianTFolder | null;
+  getRoot(): ObsidianTFolder;
   getMarkdownFiles(): ObsidianTFile[];
   read(file: ObsidianTFile): Promise<string>;
   readBinary(file: ObsidianTFile): Promise<ArrayBuffer>;
@@ -43,8 +62,12 @@ export type ObsidianAppLike = {
   metadataCache: ObsidianMetadataCache;
 };
 
-function isMarkdown(file: ObsidianTFile | null | undefined): file is ObsidianTFile {
-  return !!file && file.extension === "md";
+function isMarkdown(file: ObsidianTFile | ObsidianTFolder | null | undefined): file is ObsidianTFile {
+  return !!file && "extension" in file && file.extension === "md" && "stat" in file;
+}
+
+function isFolder(file: ObsidianTFile | ObsidianTFolder | null | undefined): file is ObsidianTFolder {
+  return !!file && "children" in file && Array.isArray(file.children);
 }
 
 function mimeFor(path: string): string {
@@ -80,12 +103,53 @@ export class ObsidianVaultAdapter implements VaultPort {
   }
 
   private toSummary(file: ObsidianTFile): VaultNoteSummary {
+    const cache = this.app.metadataCache.getFileCache(file);
     return {
       id: file.path,
       vaultRelativePath: file.path,
       title: file.basename,
       modifiedAt: new Date(file.stat.mtime).toISOString(),
-      byteLength: file.stat.size
+      byteLength: file.stat.size,
+      attachmentCount: cache?.embeds?.length ?? 0
+    };
+  }
+
+  async listFolder(request: FolderListRequest): Promise<FolderListResponse> {
+    const path = normalizeFolderListPath(request.vaultRelativePath);
+    if (path === null) throw Object.assign(new Error("PATH_REJECTED"), {code: "PATH_REJECTED"});
+    const folder = path === "" ? this.app.vault.getRoot() : this.app.vault.getAbstractFileByPath(path);
+    if (!isFolder(folder)) throw Object.assign(new Error("NOT_FOUND"), {code: "NOT_FOUND"});
+    const truncatedScan = folder.children.length > FOLDER_LIST_SCAN_MAX;
+    const scanned = folder.children.slice(0, FOLDER_LIST_SCAN_MAX);
+    const folders: FolderListEntry[] = [];
+    const notes: FolderListEntry[] = [];
+    for (const child of scanned) {
+      if (isFolder(child)) {
+        folders.push({
+          kind: "folder",
+          name: child.name || child.path.split("/").pop() || child.path,
+          vaultRelativePath: child.path
+        });
+        continue;
+      }
+      if (isMarkdown(child)) {
+        const summary = this.toSummary(child);
+        notes.push({
+          kind: "note",
+          name: summary.title,
+          vaultRelativePath: summary.vaultRelativePath,
+          note: summary
+        });
+      }
+    }
+    folders.sort((a, b) => a.name.localeCompare(b.name));
+    notes.sort((a, b) => a.name.localeCompare(b.name));
+    const combined = [...folders, ...notes];
+    return {
+      vaultRelativePath: path,
+      parentPath: parentFolderPath(path),
+      entries: combined.slice(0, FOLDER_LIST_SHOW_MAX),
+      truncated: truncatedScan || combined.length > FOLDER_LIST_SHOW_MAX
     };
   }
 

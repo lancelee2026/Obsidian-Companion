@@ -16,6 +16,7 @@ export {
   hashSecret,
   isStoredClient,
   normalizeVaultRelativePath,
+  normalizeFolderListPath,
   statusResponse,
   SERVICE_VERSION
 } from "./core";

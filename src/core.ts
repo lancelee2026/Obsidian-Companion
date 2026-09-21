@@ -4,6 +4,8 @@ import type {
   CompanionErrorCode,
   CompanionSession,
   CompanionStatusResponse,
+  FolderListRequest,
+  FolderListResponse,
   PairRequest,
   PairResult,
   PairState,
@@ -20,7 +22,9 @@ import {PROTOCOL_VERSION} from "@noteferry/protocol";
 
 export const COMPANION_HOST = "127.0.0.1";
 export const COMPANION_PORT = 27125;
-export const SERVICE_VERSION = "0.1.0";
+export const SERVICE_VERSION = "0.1.2";
+export const FOLDER_LIST_SCAN_MAX = 200;
+export const FOLDER_LIST_SHOW_MAX = 80;
 
 export const MAX_BODY_BYTES = 64 * 1024;
 export const MAX_FILE_BYTES = 80 * 1024 * 1024;
@@ -31,6 +35,7 @@ export type VaultPort = {
   getCurrent(): Promise<VaultNoteSummary | null>;
   getRecent(): Promise<VaultNoteSummary[]>;
   search(request: SearchRequest): Promise<SearchResponse>;
+  listFolder(request: FolderListRequest): Promise<FolderListResponse>;
   listAttachments(noteId: string): Promise<VaultAttachmentDescriptor[]>;
   resolveNotePath(noteId: string): Promise<string | null>;
   readFile(vaultRelativePath: string): Promise<Uint8Array>;
@@ -83,6 +88,20 @@ export function normalizeVaultRelativePath(raw: string): string | null {
   }
   if (out.length === 0) return null;
   return out.join("/");
+}
+
+/** Empty string is the vault root; other values use the same containment rules as file paths. */
+export function normalizeFolderListPath(raw: string): string | null {
+  if (typeof raw !== "string" || raw.length > 1024) return null;
+  const trimmed = raw.replaceAll("\\", "/").trim();
+  if (trimmed.length === 0) return "";
+  return normalizeVaultRelativePath(trimmed);
+}
+
+export function parentFolderPath(path: string): string | null {
+  if (!path) return null;
+  const index = path.lastIndexOf("/");
+  return index === -1 ? "" : path.slice(0, index);
 }
 
 export function statusResponse(): CompanionStatusResponse {

@@ -9,6 +9,7 @@
 | Status | no vault fields in `/v1/status` | Verified by `pnpm test` |
 | Resolve | image/pdf/mp4 included; nested skipped | Verified by `pnpm test` |
 | File read | bytes returned; traversal `PATH_REJECTED` | Verified by `pnpm test` |
+| Folder list | root/notes listing, attachmentCount, traversal rejected, truncated at show cap | Verified by `pnpm test` |
 | Oversized body | large pair request rejected | Verified by `pnpm test` |
 | Build | `dist/main.js` + `manifest.json` | Verified by `pnpm build` |
 
@@ -19,6 +20,6 @@
 - macOS and Windows vault fixtures for path edge cases.
 - Community Plugin listing disclosure matches runtime.
 
-Current automated result: `pnpm test` and `pnpm typecheck` pass after attachable mp4/webm/mov resolve inclusion.
+Current automated result: `pnpm test` and `pnpm typecheck` pass after folder/list and attachmentCount.
 
 Do not mark live rows Verified from Node FakeVault tests alone.

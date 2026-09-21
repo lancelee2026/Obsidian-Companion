@@ -70,6 +70,7 @@ export interface VaultNoteSummary {
   title: string;
   modifiedAt: string;
   byteLength: number;
+  attachmentCount?: number;
 }
 
 export interface SearchRequest {
@@ -79,6 +80,30 @@ export interface SearchRequest {
 
 export interface SearchResponse {
   notes: VaultNoteSummary[];
+}
+
+export interface FolderListRequest {
+  vaultRelativePath: string;
+}
+
+export type FolderListEntry =
+  | {
+      kind: "folder";
+      name: string;
+      vaultRelativePath: string;
+    }
+  | {
+      kind: "note";
+      name: string;
+      vaultRelativePath: string;
+      note: VaultNoteSummary;
+    };
+
+export interface FolderListResponse {
+  vaultRelativePath: string;
+  parentPath: string | null;
+  entries: FolderListEntry[];
+  truncated: boolean;
 }
 
 export interface ResolveContextRequest {

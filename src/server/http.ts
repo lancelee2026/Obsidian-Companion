@@ -1,5 +1,6 @@
 import {createServer, type IncomingMessage, type Server, type ServerResponse} from "node:http";
 import type {
+  FolderListRequest,
   PairRequest,
   ReadFileRequest,
   ResolveContextRequest,
@@ -15,6 +16,7 @@ import {
   errorBody,
   isProtocolVersion,
   normalizeVaultRelativePath,
+  normalizeFolderListPath,
   resolveContext,
   statusResponse,
   type PairingStore,
@@ -177,6 +179,34 @@ export function createCompanionServer(options: CompanionServerOptions): Companio
         return;
       }
       sendJson(res, 200, await options.vault.search(body as SearchRequest));
+      return;
+    }
+
+    if (method === "POST" && url.pathname === "/v1/folder/list") {
+      const body = await readJson(req);
+      if (!body || typeof body !== "object" || typeof (body as FolderListRequest).vaultRelativePath !== "string") {
+        sendJson(res, 400, errorBody("INVALID_REQUEST", "Invalid folder request.", false));
+        return;
+      }
+      const path = normalizeFolderListPath((body as FolderListRequest).vaultRelativePath);
+      if (path === null) {
+        sendJson(res, 400, errorBody("PATH_REJECTED", "The requested file is outside this vault.", false));
+        return;
+      }
+      try {
+        sendJson(res, 200, await options.vault.listFolder({vaultRelativePath: path}));
+      } catch (error) {
+        const code = error && typeof error === "object" && "code" in error ? String((error as {code: unknown}).code) : "";
+        if (code === "NOT_FOUND") {
+          sendJson(res, 404, errorBody("NOT_FOUND", "Folder not found.", false));
+          return;
+        }
+        if (code === "PATH_REJECTED") {
+          sendJson(res, 400, errorBody("PATH_REJECTED", "The requested file is outside this vault.", false));
+          return;
+        }
+        sendJson(res, 500, errorBody("INTERNAL_ERROR", "Something went wrong.", true));
+      }
       return;
     }
 

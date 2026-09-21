@@ -1,10 +1,20 @@
 import type {
+  FolderListRequest,
+  FolderListResponse,
+  FolderListEntry,
   SearchRequest,
   SearchResponse,
   VaultAttachmentDescriptor,
   VaultNoteSummary
 } from "@noteferry/protocol";
-import {classifyAttachment, type VaultPort} from "../core";
+import {
+  classifyAttachment,
+  FOLDER_LIST_SCAN_MAX,
+  FOLDER_LIST_SHOW_MAX,
+  normalizeFolderListPath,
+  parentFolderPath,
+  type VaultPort
+} from "../core";
 
 export type FakeNote = {
   id: string;
@@ -77,6 +87,66 @@ export class FakeVault implements VaultPort {
     return {notes};
   }
 
+  async listFolder(request: FolderListRequest): Promise<FolderListResponse> {
+    const path = normalizeFolderListPath(request.vaultRelativePath);
+    if (path === null) throw Object.assign(new Error("PATH_REJECTED"), {code: "PATH_REJECTED"});
+    const childFolders = new Map<string, string>();
+    const notes: FolderListEntry[] = [];
+    for (const note of this.notes.values()) {
+      const parent = parentFolderPath(note.vaultRelativePath) ?? "";
+      if (parent === path) {
+        const summary = await this.noteSummary(note.id);
+        if (summary) {
+          notes.push({
+            kind: "note",
+            name: summary.title,
+            vaultRelativePath: summary.vaultRelativePath,
+            note: summary
+          });
+        }
+        continue;
+      }
+      if (path === "") {
+        const top = note.vaultRelativePath.split("/")[0];
+        if (top && note.vaultRelativePath.includes("/")) childFolders.set(top, top);
+        continue;
+      }
+      if (note.vaultRelativePath.startsWith(`${path}/`)) {
+        const rest = note.vaultRelativePath.slice(path.length + 1);
+        const next = rest.split("/")[0];
+        if (next && rest.includes("/")) {
+          const childPath = `${path}/${next}`;
+          childFolders.set(childPath, next);
+        }
+      }
+    }
+    if (path !== "" && notes.length === 0 && childFolders.size === 0) {
+      const known = [...this.notes.values()].some((note) => {
+        const parent = parentFolderPath(note.vaultRelativePath) ?? "";
+        return parent === path || note.vaultRelativePath.startsWith(`${path}/`);
+      });
+      const isRootChild = [...this.notes.values()].some((note) => (note.vaultRelativePath.split("/")[0] ?? "") === path);
+      if (!known && !isRootChild) {
+        throw Object.assign(new Error("NOT_FOUND"), {code: "NOT_FOUND"});
+      }
+    }
+    const folders: FolderListEntry[] = [...childFolders.entries()].map(([vaultRelativePath, name]) => ({
+      kind: "folder",
+      name,
+      vaultRelativePath
+    }));
+    folders.sort((a, b) => a.name.localeCompare(b.name));
+    notes.sort((a, b) => a.name.localeCompare(b.name));
+    const scanned = [...folders, ...notes].slice(0, FOLDER_LIST_SCAN_MAX);
+    const truncated = scanned.length > FOLDER_LIST_SHOW_MAX || folders.length + notes.length > FOLDER_LIST_SCAN_MAX;
+    return {
+      vaultRelativePath: path,
+      parentPath: parentFolderPath(path),
+      entries: scanned.slice(0, FOLDER_LIST_SHOW_MAX),
+      truncated
+    };
+  }
+
   async listAttachments(noteId: string): Promise<VaultAttachmentDescriptor[]> {
     const note = this.notes.get(noteId);
     if (!note) return [];
@@ -109,7 +179,8 @@ export class FakeVault implements VaultPort {
       vaultRelativePath: note.vaultRelativePath,
       title: note.title,
       modifiedAt: note.modifiedAt,
-      byteLength: bytes?.byteLength ?? 0
+      byteLength: bytes?.byteLength ?? 0,
+      attachmentCount: note.attachments.length
     };
   }
 }

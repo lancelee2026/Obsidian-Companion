@@ -21,7 +21,7 @@ Owned here for the Companion implementation. Types live in `packages/protocol`. 
 | `GET /v1/current` | bearer | Implemented |
 | `GET /v1/recent` | bearer | Implemented |
 | `POST /v1/search` | bearer | Implemented |
-| `POST /v1/folder/list` | bearer | Proposed |
+| `POST /v1/folder/list` | bearer | Implemented |
 | `POST /v1/context/resolve` | bearer | Implemented |
 | `POST /v1/file/read` | bearer | Implemented |
 | `DELETE /v1/client` | bearer | Implemented |
@@ -34,7 +34,7 @@ Owned here for the Companion implementation. Types live in `packages/protocol`. 
 4. Companion stores SHA-256 hash only; extension stores secret in `chrome.storage.local`.
 5. `DELETE /v1/client` revokes the session.
 
-`VaultNoteSummary.attachmentCount` and `POST /v1/folder/list` are **Proposed** (additive). Folder listing uses Obsidian vault APIs only. Align types with [noteferry](https://github.com/lancelee2026/noteferry) `documentation/protocol.md` and `phase-plan.md` Picker pack slice.
+`VaultNoteSummary.attachmentCount` and `POST /v1/folder/list` are **Implemented** (additive). Folder listing uses Obsidian vault APIs only. Align types with [noteferry](https://github.com/lancelee2026/noteferry) `documentation/protocol.md` and `phase-plan.md` Picker pack slice.
 
 ## Errors
 
