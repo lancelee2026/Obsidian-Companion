@@ -6,8 +6,8 @@ Read `PRODUCT.md`, `documentation/README.md`, `documentation/system-design.md`, 
 
 ## Status
 
-- `Implemented`: HTTP companion, pairing with durable client-hash persistence, vault ports, Obsidian plugin shell, protocol package, `POST /v1/folder/list`, optional `attachmentCount`, documentation set. Plugin **0.1.2**.
-- `Verified`: `pnpm build`, `pnpm typecheck`, `pnpm test` (path, pairing + restore, status, resolve/read, folder list + truncation, attachment counts).
+- `Implemented`: HTTP companion, pairing with durable client-hash persistence, vault ports, Obsidian plugin shell, plugin UI locale from Obsidian language (en / zh-Hans), protocol package, `POST /v1/folder/list`, optional `attachmentCount`, documentation set. Plugin **0.1.2**.
+- `Verified`: `pnpm build`, `pnpm typecheck`, `pnpm test` (9) after plugin UI follows Obsidian language (en / zh-Hans). Live pairing copy is Unverified.
 - `Proposed`: Community Plugin listing polish, deeper packaging docs.
 - `Unverified`: live Obsidian Desktop restart self-heal after Allow; macOS/Windows release packaging.
 

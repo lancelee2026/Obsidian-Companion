@@ -15,11 +15,11 @@
 
 ## Live / packaging (`Unverified`)
 
-- Pairing Allow/Deny on real Obsidian Desktop.
+- Pairing Allow/Deny on real Obsidian Desktop (copy follows Obsidian language: 允许/拒绝 in zh).
 - Server stops cleanly on plugin unload.
 - macOS and Windows vault fixtures for path edge cases.
 - Community Plugin listing disclosure matches runtime.
 
-Current automated result: `pnpm test` and `pnpm typecheck` pass after folder/list and attachmentCount.
+Current automated result: `pnpm test` (9), `pnpm typecheck`, and `pnpm build` pass after plugin UI follows Obsidian language.
 
 Do not mark live rows Verified from Node FakeVault tests alone.

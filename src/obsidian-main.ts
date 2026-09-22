@@ -1,4 +1,5 @@
 import {Plugin, Notice, Modal, Setting, App, PluginSettingTab} from "obsidian";
+import * as ObsidianApi from "obsidian";
 import {
   createMemoryPairingStore,
   isStoredClient,
@@ -6,6 +7,7 @@ import {
   type CompanionServer,
   type StoredClient
 } from "./index";
+import {detectLocale, interpolate, t, type Locale} from "./i18n";
 import type {ObsidianAppLike} from "./vault/obsidian";
 
 type PluginData = {
@@ -19,9 +21,10 @@ export default class NoteFerryCompanionPlugin extends Plugin {
   private server: CompanionServer | null = null;
 
   override async onload(): Promise<void> {
+    const locale = pluginLocale();
     this.addCommand({
       id: "noteferry-revoke-browser",
-      name: "NoteFerry: Disconnect browser access",
+      name: t("commandRevoke", locale),
       callback: () => {
         void this.revokeAllClients();
       }
@@ -48,12 +51,10 @@ export default class NoteFerryCompanionPlugin extends Plugin {
         }
       });
       new Notice(
-        initialClients.length > 0
-          ? "NoteFerry is ready. Your browser stays connected."
-          : "NoteFerry is ready to connect from your browser."
+        t(initialClients.length > 0 ? "noticeReadyPaired" : "noticeReadyNew", locale)
       );
     } catch {
-      new Notice("NoteFerry could not start. Quit other copies of Obsidian and try again.");
+      new Notice(t("noticeStartFail", locale));
     }
 
     this.addSettingTab(new NoteFerrySettingTab(this.app, this));
@@ -65,9 +66,10 @@ export default class NoteFerryCompanionPlugin extends Plugin {
   }
 
   async revokeAllClients(): Promise<void> {
+    const locale = pluginLocale();
     const pairing = this.server?.pairing;
     if (!pairing) {
-      new Notice("NoteFerry is not running.");
+      new Notice(t("noticeNotRunning", locale));
       return;
     }
     const data = (await this.loadData()) as PluginData | null;
@@ -76,7 +78,7 @@ export default class NoteFerryCompanionPlugin extends Plugin {
       if (isStoredClient(client)) pairing.revoke(client.clientId);
     }
     await this.saveData({clients: []} satisfies PluginData);
-    new Notice("NoteFerry browser access cleared. Pair again from the extension if needed.");
+    new Notice(t("noticeRevoked", locale));
   }
 }
 
@@ -90,18 +92,19 @@ class PairRequestModal extends Modal {
   }
 
   override onOpen(): void {
+    const locale = pluginLocale();
     const {contentEl} = this;
     contentEl.empty();
-    contentEl.createEl("h2", {text: "Allow NoteFerry?"});
+    contentEl.createEl("h2", {text: t("pairTitle", locale)});
     contentEl.createEl("p", {
-      text: `${this.clientName} wants to read notes you choose and attach them in ChatGPT, Claude, or Gemini. Vault files stay on this computer until you attach them.`
+      text: interpolate(t("pairBody", locale), this.clientName)
     });
     new Setting(contentEl)
-      .addButton((button) => button.setButtonText("Deny").onClick(() => {
+      .addButton((button) => button.setButtonText(t("deny", locale)).onClick(() => {
         this.actions.deny();
         this.close();
       }))
-      .addButton((button) => button.setButtonText("Allow").setCta().onClick(() => {
+      .addButton((button) => button.setButtonText(t("allow", locale)).setCta().onClick(() => {
         this.actions.approve();
         this.close();
       }));
@@ -118,19 +121,36 @@ class NoteFerrySettingTab extends PluginSettingTab {
   }
 
   override display(): void {
+    const locale = pluginLocale();
     const {containerEl} = this;
     containerEl.empty();
-    containerEl.createEl("h2", {text: "NoteFerry"});
-    containerEl.createEl("p", {
-      text: "Connect the NoteFerry browser extension once. After you Allow access, the connection stays until you disconnect. Notes never leave this computer until you attach them to an AI chat."
-    });
+    containerEl.createEl("h2", {text: t("settingsTitle", locale)});
+    containerEl.createEl("p", {text: t("settingsLead", locale)});
     new Setting(containerEl)
-      .setName("Browser access")
-      .setDesc("Clear saved browser pairing on this computer.")
+      .setName(t("settingsAccess", locale))
+      .setDesc(t("settingsAccessHint", locale))
       .addButton((button) =>
-        button.setButtonText("Disconnect browser").setWarning().onClick(() => {
+        button.setButtonText(t("settingsDisconnect", locale)).setWarning().onClick(() => {
           void this.plugin.revokeAllClients().then(() => this.display());
         })
       );
   }
+}
+
+function pluginLocale(): Locale {
+  return detectLocale(obsidianLanguage());
+}
+
+function obsidianLanguage(): string {
+  const read = (ObsidianApi as {getLanguage?: () => string}).getLanguage;
+  if (typeof read === "function") return read();
+  const api = globalThis as {moment?: {locale?: () => string}};
+  try {
+    const fromStorage = localStorage.getItem("language");
+    if (fromStorage) return fromStorage;
+  } catch {
+    /* ignore */
+  }
+  if (typeof api.moment?.locale === "function") return api.moment.locale();
+  return "";
 }
