@@ -27,7 +27,7 @@ People who keep notes in Obsidian Desktop on the same machine as Chrome, and use
 - Short-lived pairing with one-time secret return; Companion stores hashes only and keeps approved clients across Obsidian restarts until the user disconnects.
 - Authenticated: session, current note, recent notes, filename/path search, one-directory folder list, context resolve, file read, client revoke.
 - Optional `attachmentCount` on note summaries from `metadataCache` embeds so the extension can show counts before resolve. Not Local REST. Not an E2N folder IPC clone.
-- Attachment classification: image, pdf, and mp4/webm/mov video included; audio, nested-md, unknown, and other video skipped with reasons.
+- Attachment classification: image, pdf, Word (`docx`), spreadsheet (`xlsx`), and mp4/webm/mov video included as leftover files beside the compiled document pack; audio, nested-md, unknown, and other video skipped with reasons.
 
 ## Constraints
 

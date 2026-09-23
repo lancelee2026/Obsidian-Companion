@@ -4,7 +4,9 @@ import {
   createMemoryPairingStore,
   hashSecret,
   normalizeVaultRelativePath,
-  normalizeFolderListPath
+  normalizeFolderListPath,
+  classifyAttachment,
+  skipReason
 } from "../src/core";
 import {createCompanionServer} from "../src/server/http";
 import {FakeVault} from "../src/vault/fake";
@@ -46,6 +48,20 @@ function fixtureVault() {
           displayName: "paper.pdf",
           mimeType: "application/pdf",
           bytes: new Uint8Array([37, 80, 68, 70])
+        },
+        {
+          id: "notes/brief.docx",
+          vaultRelativePath: "notes/brief.docx",
+          displayName: "brief.docx",
+          mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+          bytes: new Uint8Array([80, 75])
+        },
+        {
+          id: "notes/data.xlsx",
+          vaultRelativePath: "notes/data.xlsx",
+          displayName: "data.xlsx",
+          mimeType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+          bytes: new Uint8Array([80, 75, 3])
         }
       ]
     },
@@ -79,6 +95,18 @@ async function pairedClient(base: string, pairingApprove: (id: string) => void) 
   });
   return await approved.json() as {clientId: string; secret: string};
 }
+
+describe("attachment leftover policy", () => {
+  it("includes Word and spreadsheet leftovers and skips unknown types", () => {
+    expect(classifyAttachment("notes/brief.docx")).toBe("other");
+    expect(classifyAttachment("notes/data.xlsx")).toBe("other");
+    expect(skipReason("other", "brief.docx")).toBeUndefined();
+    expect(skipReason("other", "data.xlsx")).toBeUndefined();
+    expect(skipReason("other", "archive.zip")).toBe("unsupported-type");
+    expect(skipReason("pdf", "paper.pdf")).toBeUndefined();
+    expect(skipReason("audio", "talk.mp3")).toBe("audio-not-supported");
+  });
+});
 
 describe("path normalization", () => {
   it("rejects traversal and absolute paths", () => {
@@ -173,7 +201,7 @@ describe("companion http", () => {
     const current = await fetch(`${base}/v1/current`, {headers: auth});
     const currentBody = await current.json() as {title: string; attachmentCount?: number};
     expect(currentBody.title).toBe("Project Alpha");
-    expect(currentBody.attachmentCount).toBe(4);
+    expect(currentBody.attachmentCount).toBe(6);
 
     const recent = await fetch(`${base}/v1/recent`, {headers: auth});
     expect(await recent.json()).toHaveLength(2);
@@ -202,7 +230,7 @@ describe("companion http", () => {
     const notesBody = await notesFolder.json() as {
       entries: Array<{kind: string; name: string; note?: {attachmentCount?: number}}>;
     };
-    expect(notesBody.entries.some((entry) => entry.kind === "note" && entry.name === "Project Alpha" && entry.note?.attachmentCount === 4)).toBe(true);
+    expect(notesBody.entries.some((entry) => entry.kind === "note" && entry.name === "Project Alpha" && entry.note?.attachmentCount === 6)).toBe(true);
 
     const traversalFolder = await fetch(`${base}/v1/folder/list`, {
       method: "POST",
@@ -230,6 +258,8 @@ describe("companion http", () => {
     expect(manifest.items.some((item) => item.displayName === "Project Alpha" && item.state === "included")).toBe(true);
     expect(manifest.items.some((item) => item.displayName === "img.png" && item.state === "included")).toBe(true);
     expect(manifest.items.some((item) => item.displayName === "paper.pdf" && item.state === "included")).toBe(true);
+    expect(manifest.items.some((item) => item.displayName === "brief.docx" && item.state === "included")).toBe(true);
+    expect(manifest.items.some((item) => item.displayName === "data.xlsx" && item.state === "included")).toBe(true);
     expect(manifest.items.some((item) => item.displayName === "clip.mp4" && item.state === "included")).toBe(true);
     expect(manifest.items.some((item) => item.state === "skipped" && item.reason === "nested-note-not-expanded")).toBe(true);
 

@@ -7,7 +7,7 @@
 | Path normalize | traversal and absolute paths rejected | Verified by `pnpm test` |
 | Pairing store | auth via hash; wrong secret fails; approved clients restore after recreate | Verified by `pnpm test` |
 | Status | no vault fields in `/v1/status` | Verified by `pnpm test` |
-| Resolve | image/pdf/mp4 included; nested skipped | Verified by `pnpm test` |
+| Resolve | image/pdf/mp4/docx/xlsx included; nested skipped | Verified by `pnpm test` |
 | File read | bytes returned; traversal `PATH_REJECTED` | Verified by `pnpm test` |
 | Folder list | root/notes listing, attachmentCount, traversal rejected, truncated at show cap | Verified by `pnpm test` |
 | Oversized body | large pair request rejected | Verified by `pnpm test` |
@@ -24,6 +24,6 @@
 - macOS and Windows vault fixtures for path edge cases.
 - Community Plugin listing disclosure matches runtime.
 
-Current automated result: `pnpm test` (17), `pnpm typecheck`, and `pnpm build` (includes `dist/noteferry-companion.zip`) pass after vault trial watermark and computer seat file.
+Current automated result: `pnpm test` (19), `pnpm typecheck`, and `pnpm build` (includes `dist/noteferry-companion.zip`) pass after Word/spreadsheet leftovers and wiki embed resolve.
 
 Do not mark live rows Verified from Node FakeVault tests alone.

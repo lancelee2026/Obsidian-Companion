@@ -22,7 +22,7 @@ import {PROTOCOL_VERSION} from "@noteferry/protocol";
 
 export const COMPANION_HOST = "127.0.0.1";
 export const COMPANION_PORT = 27125;
-export const SERVICE_VERSION = "0.1.2";
+export const SERVICE_VERSION = "0.1.3";
 export const FOLDER_LIST_SCAN_MAX = 200;
 export const FOLDER_LIST_SHOW_MAX = 80;
 
@@ -291,7 +291,9 @@ export function skipReason(kind: VaultAttachmentDescriptor["kind"], name = ""): 
     return /\.(mp4|m4v|webm|mov)$/i.test(name) ? undefined : "video-not-supported";
   }
   if (kind === "nested-note") return "nested-note-not-expanded";
-  if (kind === "other") return "unsupported-type";
+  if (kind === "other") {
+    return /\.(docx|xlsx)$/i.test(name) ? undefined : "unsupported-type";
+  }
   return undefined;
 }
 

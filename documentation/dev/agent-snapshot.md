@@ -6,8 +6,8 @@ Read `PRODUCT.md`, `documentation/README.md`, `documentation/system-design.md`, 
 
 ## Status
 
-- `Implemented`: HTTP companion, pairing, vault ports, plugin UI locale from Obsidian language (**en / zh-Hans / zh-Hant**), protocol package, folder list, attachment counts, vault trial watermark + computer seat file, `GET`/`POST /v1/local-license`, `pnpm build` also writes `dist/noteferry-companion.zip`. Plugin **0.1.2**.
-- `Verified`: `pnpm typecheck`, `pnpm test` (17), `pnpm build` (includes `dist/noteferry-companion.zip`) after vault trial watermark and computer seat file.
+- `Implemented`: HTTP companion, pairing, vault ports, plugin UI locale from Obsidian language (**en / zh-Hans / zh-Hant**), protocol package, folder list, attachment counts, wiki embeds via `getFirstLinkpathDest`, Word/spreadsheet leftovers included, vault trial watermark + computer seat file, `GET`/`POST /v1/local-license`, `pnpm build` also writes `dist/noteferry-companion.zip`. Plugin **0.1.3**.
+- `Verified`: `pnpm typecheck`, `pnpm test` (19), `pnpm build` (includes `dist/noteferry-companion.zip`) after Word/spreadsheet leftovers and wiki embed resolve.
 - `Proposed`: Community Plugin listing. GitHub Release of the zip (human unless `gh` is authorized).
 - `Unverified`: live Obsidian Desktop restart self-heal after Allow; macOS/Windows release packaging; zip install path on a clean vault.
 

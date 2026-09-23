@@ -40,6 +40,7 @@ export type ObsidianMetadataCache = {
     embeds?: Array<{link: string}>;
     frontmatter?: Record<string, unknown>;
   } | null;
+  getFirstLinkpathDest?(linkpath: string, sourcePath: string): ObsidianTFile | null;
 };
 
 export type ObsidianVaultApi = {
@@ -79,6 +80,8 @@ function mimeFor(path: string): string {
   if (lower.endsWith(".gif")) return "image/gif";
   if (lower.endsWith(".webp")) return "image/webp";
   if (lower.endsWith(".pdf")) return "application/pdf";
+  if (lower.endsWith(".docx")) return "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+  if (lower.endsWith(".xlsx")) return "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
   if (lower.endsWith(".mp3")) return "audio/mpeg";
   if (lower.endsWith(".mp4") || lower.endsWith(".m4v")) return "video/mp4";
   if (lower.endsWith(".webm")) return "video/webm";
@@ -208,6 +211,8 @@ export class ObsidianVaultAdapter implements VaultPort {
   private resolveEmbed(fromPath: string, link: string): ObsidianTFile | null {
     const cleaned = link.split("|")[0]?.split("#")[0]?.trim() ?? "";
     if (!cleaned) return null;
+    const dest = this.app.metadataCache.getFirstLinkpathDest?.(cleaned, fromPath);
+    if (dest && "stat" in dest) return dest;
     const direct = this.app.vault.getAbstractFileByPath(cleaned);
     if (direct && "stat" in direct) return direct;
     const folder = fromPath.includes("/") ? fromPath.slice(0, fromPath.lastIndexOf("/")) : "";
