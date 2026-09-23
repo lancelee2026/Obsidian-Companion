@@ -130,3 +130,15 @@ export interface ResolveContextResult {
 export interface ReadFileRequest {
   vaultRelativePath: string;
 }
+
+export interface LocalLicenseResponse {
+  trialScopeId: string;
+  trialCount: number;
+  licenseKey: string;
+  deviceToken: string;
+}
+
+export interface LocalLicenseWriteRequest {
+  trialCount?: number;
+  licenseKey?: string;
+}

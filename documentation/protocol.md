@@ -24,6 +24,8 @@ Owned here for the Companion implementation. Types live in `packages/protocol`. 
 | `POST /v1/folder/list` | bearer | Implemented |
 | `POST /v1/context/resolve` | bearer | Implemented |
 | `POST /v1/file/read` | bearer | Implemented |
+| `GET /v1/local-license` | bearer | Implemented |
+| `POST /v1/local-license` | bearer | Implemented |
 | `DELETE /v1/client` | bearer | Implemented |
 
 ## Pairing
@@ -32,7 +34,9 @@ Owned here for the Companion implementation. Types live in `packages/protocol`. 
 2. Obsidian shows Allow/Deny.
 3. Extension polls; on approve, secret returned once.
 4. Companion stores SHA-256 hash only; extension stores secret in `chrome.storage.local`.
-5. `DELETE /v1/client` revokes the session.
+5. `DELETE /v1/client` revokes the session. Vault trial fields and a stored shop key remain.
+
+`GET /v1/local-license` returns this vault's `trialScopeId` / `trialCount` / shop key plus this computer's `deviceToken`. Counts only rise. `deviceToken` is not written into vault files.
 
 `VaultNoteSummary.attachmentCount` and `POST /v1/folder/list` are **Implemented** (additive). Folder listing uses Obsidian vault APIs only. Align types with [noteferry](https://github.com/lancelee2026/noteferry) `documentation/protocol.md` and `phase-plan.md` Picker pack slice.
 

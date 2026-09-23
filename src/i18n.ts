@@ -1,4 +1,4 @@
-export type Locale = "en" | "zh-Hans";
+export type Locale = "en" | "zh-Hans" | "zh-Hant";
 
 const copy = {
   en: {
@@ -38,13 +38,36 @@ const copy = {
     settingsAccess: "浏览器访问",
     settingsAccessHint: "清除这台电脑上已保存的浏览器配对。",
     settingsDisconnect: "断开浏览器"
+  },
+  "zh-Hant": {
+    pairTitle: "允許 NoteFerry？",
+    pairBody:
+      "{name} 想讀取你選的筆記，並加入 ChatGPT、Claude 或 Gemini。唯讀存取，不會改動或損壞本機庫。",
+    deny: "拒絕",
+    allow: "允許",
+    noticeReadyPaired: "NoteFerry 已就緒。瀏覽器保持連線。",
+    noticeReadyNew: "NoteFerry 已就緒，可從瀏覽器連線。",
+    noticeStartFail: "NoteFerry 未能啟動。請退出其他 Obsidian 視窗後再試。",
+    noticeNotRunning: "NoteFerry 未在執行。",
+    noticeRevoked: "已清除瀏覽器存取。如需使用，請在擴充功能裡重新連線。",
+    commandRevoke: "NoteFerry: 中斷瀏覽器存取",
+    settingsTitle: "NoteFerry",
+    settingsLead:
+      "用 NoteFerry 瀏覽器擴充功能連線一次。唯讀存取，不會改動或損壞本機庫。",
+    settingsAccess: "瀏覽器存取",
+    settingsAccessHint: "清除這台電腦上已儲存的瀏覽器配對。",
+    settingsDisconnect: "中斷瀏覽器"
   }
 } as const;
 
 export type CopyKey = keyof typeof copy.en;
 
 export function detectLocale(language = ""): Locale {
-  return language.toLowerCase().startsWith("zh") ? "zh-Hans" : "en";
+  const nav = language.toLowerCase();
+  if (nav.startsWith("zh-tw") || nav.startsWith("zh-hk") || nav.startsWith("zh-mo") || nav.startsWith("zh-hant")) {
+    return "zh-Hant";
+  }
+  return nav.startsWith("zh") ? "zh-Hans" : "en";
 }
 
 export function t(key: CopyKey, locale: Locale): string {

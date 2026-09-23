@@ -6,6 +6,9 @@ describe("companion locale", () => {
     expect(detectLocale("zh")).toBe("zh-Hans");
     expect(detectLocale("zh-cn")).toBe("zh-Hans");
     expect(detectLocale("en")).toBe("en");
+    expect(detectLocale("zh-tw")).toBe("zh-Hant");
+    expect(t("allow", "zh-Hant")).toBe("允許");
+    expect(t("allow", "zh-Hans")).toBe("允许");
     expect(t("allow", "zh-Hans")).toBe("允许");
     expect(t("deny", "zh-Hans")).toBe("拒绝");
     expect(t("allow", "en")).toBe("Allow");

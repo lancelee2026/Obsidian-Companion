@@ -1,6 +1,7 @@
 import {createServer, type IncomingMessage, type Server, type ServerResponse} from "node:http";
 import type {
   FolderListRequest,
+  LocalLicenseWriteRequest,
   PairRequest,
   ReadFileRequest,
   ResolveContextRequest,
@@ -23,10 +24,12 @@ import {
   type RateBucket,
   type VaultPort
 } from "../core";
+import {createMemoryLocalLicensePort, type LocalLicensePort} from "../local-license";
 
 export type CompanionServerOptions = {
   vault: VaultPort;
   pairing?: PairingStore;
+  localLicense?: LocalLicensePort;
   host?: string;
   port?: number;
   allowedOrigins?: readonly string[];
@@ -42,6 +45,7 @@ export type CompanionServer = {
 
 export function createCompanionServer(options: CompanionServerOptions): CompanionServer {
   const pairing = options.pairing ?? createMemoryPairingStore();
+  const localLicense = options.localLicense ?? createMemoryLocalLicensePort();
   const host = options.host ?? COMPANION_HOST;
   const requestedPort = options.port ?? COMPANION_PORT;
   const allowedOrigins = new Set(options.allowedOrigins ?? []);
@@ -154,6 +158,21 @@ export function createCompanionServer(options: CompanionServerOptions): Companio
 
     if (method === "GET" && url.pathname === "/v1/session") {
       sendJson(res, 200, session);
+      return;
+    }
+
+    if (method === "GET" && url.pathname === "/v1/local-license") {
+      sendJson(res, 200, await localLicense.snapshot());
+      return;
+    }
+
+    if (method === "POST" && url.pathname === "/v1/local-license") {
+      const body = await readJson(req);
+      if (!isLocalLicenseWrite(body)) {
+        sendJson(res, 400, errorBody("INVALID_REQUEST", "Invalid license request.", false));
+        return;
+      }
+      sendJson(res, 200, await localLicense.write(body));
       return;
     }
 
@@ -357,6 +376,16 @@ function isPairRequest(value: unknown): value is PairRequest {
   return typeof body.clientName === "string"
     && typeof body.extensionVersion === "string"
     && typeof body.protocolVersion === "string";
+}
+
+function isLocalLicenseWrite(value: unknown): value is LocalLicenseWriteRequest {
+  if (!value || typeof value !== "object") return false;
+  const body = value as Record<string, unknown>;
+  if ("trialCount" in body && (typeof body.trialCount !== "number" || !Number.isFinite(body.trialCount))) {
+    return false;
+  }
+  if ("licenseKey" in body && typeof body.licenseKey !== "string") return false;
+  return true;
 }
 
 function isResolveRequest(value: unknown): value is ResolveContextRequest {

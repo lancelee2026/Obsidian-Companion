@@ -49,6 +49,8 @@ export type ObsidianVaultApi = {
   read(file: ObsidianTFile): Promise<string>;
   readBinary(file: ObsidianTFile): Promise<ArrayBuffer>;
   getResourcePath?(file: ObsidianTFile): string;
+  adapter?: {getBasePath?: () => string};
+  configDir?: string;
 };
 
 export type ObsidianWorkspaceApi = {

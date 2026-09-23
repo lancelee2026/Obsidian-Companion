@@ -8,6 +8,7 @@ import {
 } from "../src/core";
 import {createCompanionServer} from "../src/server/http";
 import {FakeVault} from "../src/vault/fake";
+import {createMemoryLocalLicensePort} from "../src/local-license";
 
 function fixtureVault() {
   return new FakeVault([
@@ -291,6 +292,53 @@ describe("folder list truncation", () => {
       const body = await listed.json() as {truncated: boolean; entries: unknown[]};
       expect(body.truncated).toBe(true);
       expect(body.entries.length).toBe(80);
+    } finally {
+      await server.stop();
+    }
+  });
+});
+
+describe("local license http", () => {
+  it("returns the vault trial fields and ignores a smaller trialCount", async () => {
+    const localLicense = createMemoryLocalLicensePort({
+      trialScopeId: "vault-a",
+      trialCount: 5,
+      licenseKey: "NF-LT-saved",
+      deviceToken: "computer-1"
+    });
+    const vault = fixtureVault();
+    const server = createCompanionServer({vault, localLicense, host: "127.0.0.1", port: 0});
+    const addr = await server.start();
+    const base = `http://${addr.host}:${addr.port}`;
+    try {
+      const pair = await pairedClient(base, (id) => {
+        server.pairing.approve(id);
+      });
+      const auth = {Authorization: `Bearer ${pair.secret}`, "Content-Type": "application/json"};
+      const got = await fetch(`${base}/v1/local-license`, {headers: auth});
+      expect(await got.json()).toEqual({
+        trialScopeId: "vault-a",
+        trialCount: 5,
+        licenseKey: "NF-LT-saved",
+        deviceToken: "computer-1"
+      });
+      const lowered = await fetch(`${base}/v1/local-license`, {
+        method: "POST",
+        headers: auth,
+        body: JSON.stringify({trialCount: 2})
+      });
+      expect((await lowered.json() as {trialCount: number}).trialCount).toBe(5);
+      const raised = await fetch(`${base}/v1/local-license`, {
+        method: "POST",
+        headers: auth,
+        body: JSON.stringify({trialCount: 8, licenseKey: "NF-LT-new"})
+      });
+      expect(await raised.json()).toEqual({
+        trialScopeId: "vault-a",
+        trialCount: 8,
+        licenseKey: "NF-LT-new",
+        deviceToken: "computer-1"
+      });
     } finally {
       await server.stop();
     }

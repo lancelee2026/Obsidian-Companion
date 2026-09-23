@@ -11,7 +11,11 @@
 | File read | bytes returned; traversal `PATH_REJECTED` | Verified by `pnpm test` |
 | Folder list | root/notes listing, attachmentCount, traversal rejected, truncated at show cap | Verified by `pnpm test` |
 | Oversized body | large pair request rejected | Verified by `pnpm test` |
-| Build | `dist/main.js` + `manifest.json` | Verified by `pnpm build` |
+| Locale | Obsidian zh-TW maps to zh-Hant; Allow is 允許 | Verified by `pnpm test` |
+| Vault trial merge | sidecar scope wins; count takes max; smaller POST is ignored | Verified by `pnpm test` |
+| Trial persist | clearing clients keeps trial fields; sidecar has no computer seat id | Verified by `pnpm test` |
+| Local license HTTP | authenticated GET/POST; smaller trialCount ignored | Verified by `pnpm test` |
+| Build | `dist/main.js` + `manifest.json` + `noteferry-companion.zip` | Verified by `pnpm build` |
 
 ## Live / packaging (`Unverified`)
 
@@ -20,6 +24,6 @@
 - macOS and Windows vault fixtures for path edge cases.
 - Community Plugin listing disclosure matches runtime.
 
-Current automated result: `pnpm test` (9), `pnpm typecheck`, and `pnpm build` pass after plugin UI follows Obsidian language.
+Current automated result: `pnpm test` (17), `pnpm typecheck`, and `pnpm build` (includes `dist/noteferry-companion.zip`) pass after vault trial watermark and computer seat file.
 
 Do not mark live rows Verified from Node FakeVault tests alone.

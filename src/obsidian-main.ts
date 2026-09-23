@@ -1,24 +1,27 @@
 import {Plugin, Notice, Modal, Setting, App, PluginSettingTab} from "obsidian";
 import * as ObsidianApi from "obsidian";
 import {
+  createLicenseRuntime,
   createMemoryPairingStore,
+  deviceTokenPath,
   isStoredClient,
+  sidecarPath,
   startCompanion,
   type CompanionServer,
-  type StoredClient
+  type LicenseRuntime,
+  type PluginLicenseData
 } from "./index";
 import {detectLocale, interpolate, t, type Locale} from "./i18n";
 import type {ObsidianAppLike} from "./vault/obsidian";
 
-type PluginData = {
-  clients?: StoredClient[];
-};
+type PluginData = PluginLicenseData;
 
 /**
  * Obsidian entry. Bundled separately as main.js for the Community Plugin layout.
  */
 export default class NoteFerryCompanionPlugin extends Plugin {
   private server: CompanionServer | null = null;
+  private license: LicenseRuntime | null = null;
 
   override async onload(): Promise<void> {
     const locale = pluginLocale();
@@ -31,6 +34,12 @@ export default class NoteFerryCompanionPlugin extends Plugin {
     });
 
     try {
+      this.license = await createLicenseRuntime({
+        readPluginData: () => this.loadData(),
+        writePluginData: (data) => this.saveData(data),
+        ...(vaultSidecarPath(this.app) ? {sidecarPath: vaultSidecarPath(this.app)!} : {}),
+        deviceTokenPath: deviceTokenPath()
+      });
       const data = (await this.loadData()) as PluginData | null;
       const initialClients = Array.isArray(data?.clients)
         ? data.clients.filter(isStoredClient)
@@ -38,12 +47,13 @@ export default class NoteFerryCompanionPlugin extends Plugin {
       const pairing = createMemoryPairingStore(Date.now, {
         initialClients,
         persistClients: (clients) => {
-          void this.saveData({clients} satisfies PluginData);
+          void this.license?.persistClients(clients);
         }
       });
 
       this.server = await startCompanion(this.app as unknown as ObsidianAppLike, {
         pairing,
+        localLicense: this.license,
         onPairRequested: (requestId, clientName, actions) => {
           const modal = new PairRequestModal(this.app, clientName, actions);
           modal.open();
@@ -63,6 +73,7 @@ export default class NoteFerryCompanionPlugin extends Plugin {
   override async onunload(): Promise<void> {
     await this.server?.stop();
     this.server = null;
+    this.license = null;
   }
 
   async revokeAllClients(): Promise<void> {
@@ -77,7 +88,7 @@ export default class NoteFerryCompanionPlugin extends Plugin {
     for (const client of clients) {
       if (isStoredClient(client)) pairing.revoke(client.clientId);
     }
-    await this.saveData({clients: []} satisfies PluginData);
+    await this.license?.clearClients();
     new Notice(t("noticeRevoked", locale));
   }
 }
@@ -135,6 +146,13 @@ class NoteFerrySettingTab extends PluginSettingTab {
         })
       );
   }
+}
+
+function vaultSidecarPath(app: App): string | null {
+  const vault = app.vault as {adapter?: {getBasePath?: () => string}; configDir?: string};
+  const base = vault.adapter?.getBasePath?.();
+  if (!base) return null;
+  return sidecarPath(base, vault.configDir || ".obsidian");
 }
 
 function pluginLocale(): Locale {

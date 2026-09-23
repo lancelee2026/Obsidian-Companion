@@ -10,6 +10,7 @@ import {
 import {createCompanionServer, type CompanionServer} from "./server/http";
 import {FakeVault} from "./vault/fake";
 import {ObsidianVaultAdapter, type ObsidianAppLike} from "./vault/obsidian";
+import type {LocalLicensePort} from "./local-license";
 
 export {
   createMemoryPairingStore,
@@ -26,6 +27,18 @@ export {FakeVault} from "./vault/fake";
 export {ObsidianVaultAdapter} from "./vault/obsidian";
 export type {CompanionServer} from "./server/http";
 export type {ObsidianAppLike} from "./vault/obsidian";
+export {
+  applyLicenseWrite,
+  createLicenseRuntime,
+  createMemoryLocalLicensePort,
+  deviceTokenPath,
+  mergeVaultLicense,
+  parseVaultLicense,
+  readOrCreateDeviceToken,
+  sidecarPath,
+  sidecarPayload
+} from "./local-license";
+export type {LicenseRuntime, LocalLicensePort, PluginLicenseData, VaultLicenseFields} from "./local-license";
 
 /** Phase 0 contract anchor retained for imports. */
 export const companionStatusFixture = (serviceVersion: string): CompanionStatusResponse => ({
@@ -42,6 +55,7 @@ export async function startCompanion(
   app: ObsidianAppLike,
   options?: {
     pairing?: PairingStore;
+    localLicense?: LocalLicensePort;
     onPairRequested?: (requestId: string, clientName: string, actions: {
       approve: () => void;
       deny: () => void;
@@ -52,6 +66,7 @@ export async function startCompanion(
   const server = createCompanionServer({
     vault,
     ...(options?.pairing ? {pairing: options.pairing} : {}),
+    ...(options?.localLicense ? {localLicense: options.localLicense} : {}),
     onPairRequested: (requestId, clientName) => {
       options?.onPairRequested?.(requestId, clientName, {
         approve: () => {

@@ -2,7 +2,7 @@
 
 ## Snapshot
 
-- **Implemented:** loopback HTTP server, pairing store with durable approved-client hashes (pending requests stay in memory), FakeVault tests, Obsidian vault adapter, plugin shell with Allow/Deny pairing UI, esbuild `dist/main.js` + `manifest.json`, one-directory folder list, optional attachment counts.
+- **Implemented:** loopback HTTP server, pairing store with durable approved-client hashes (pending requests stay in memory), FakeVault tests, Obsidian vault adapter, plugin shell with Allow/Deny pairing UI, esbuild `dist/main.js` + `manifest.json`, one-directory folder list, optional attachment counts, vault trial watermark plus computer seat file for license redeem.
 - **Proposed:** deeper Obsidian packaging UX polish, store listing assets.
 - **Unverified:** live Obsidian Desktop on macOS/Windows, real-vault path edge cases beyond unit fixtures.
 
@@ -26,6 +26,7 @@ Chrome extension service worker  (noteferry repo)
 |---|---|
 | `src/server/http.ts` | Host/Origin/Content-Type/body/rate checks; routes |
 | `src/core.ts` | Pairing store, path normalize, resolve policy, status |
+| `src/local-license.ts` | Vault trial merge, sidecar, computer seat file |
 | `src/vault/obsidian.ts` | Obsidian API: current, recent, search, folder children, embeds, read |
 | `src/vault/fake.ts` | Deterministic vault for Node tests |
 | `src/obsidian-main.ts` | Plugin entry, notices, settings copy |
@@ -37,6 +38,8 @@ Chrome extension service worker  (noteferry repo)
 - `GET /v1/status` returns no vault fields.
 - Binary responses are bounded; oversized bodies rejected.
 - No vault content is sent to any NoteFerry cloud worker from this plugin.
+- Vault trial fields live in plugin `data.json` and a settings sidecar outside the plugin folder. Disconnecting a browser does not clear them.
+- This computer's paid-seat identifier lives in the user-account directory and is not written into vault files.
 
 ## Sibling boundary
 
