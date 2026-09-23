@@ -271,6 +271,10 @@ export function createCompanionServer(options: CompanionServerOptions): Companio
           sendJson(res, 400, errorBody("PATH_REJECTED", "The requested file is outside this vault.", false));
           return;
         }
+        if (code === "PAYLOAD_TOO_LARGE") {
+          sendJson(res, 413, errorBody("PAYLOAD_TOO_LARGE", "File is too large.", false));
+          return;
+        }
         sendJson(res, 500, errorBody("INTERNAL_ERROR", "Something went wrong.", true));
       }
       return;

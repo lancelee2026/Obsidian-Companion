@@ -24,6 +24,6 @@
 - macOS and Windows vault fixtures for path edge cases.
 - Community Plugin listing disclosure matches runtime.
 
-Current automated result: `pnpm test` (19), `pnpm typecheck`, and `pnpm build` (includes `dist/noteferry-companion.zip`) pass after Word/spreadsheet leftovers and wiki embed resolve.
+Current automated result: `pnpm test` (19), `pnpm typecheck`, and `pnpm build` (includes `dist/noteferry-companion.zip`) pass after the wider leftover allowlist and the 2 GB read ceiling.
 
 Do not mark live rows Verified from Node FakeVault tests alone.

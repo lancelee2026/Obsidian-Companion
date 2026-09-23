@@ -15,6 +15,7 @@ import {
   classifyAttachment,
   FOLDER_LIST_SCAN_MAX,
   FOLDER_LIST_SHOW_MAX,
+  MAX_FILE_BYTES,
   normalizeFolderListPath,
   normalizeVaultRelativePath,
   parentFolderPath,
@@ -232,6 +233,9 @@ export class ObsidianVaultAdapter implements VaultPort {
     if (!path) throw Object.assign(new Error("PATH_REJECTED"), {code: "PATH_REJECTED"});
     const file = this.app.vault.getAbstractFileByPath(path);
     if (!file || !("stat" in file)) throw Object.assign(new Error("NOT_FOUND"), {code: "NOT_FOUND"});
+    if (file.stat.size > MAX_FILE_BYTES) {
+      throw Object.assign(new Error("PAYLOAD_TOO_LARGE"), {code: "PAYLOAD_TOO_LARGE"});
+    }
     if (file.extension === "md") {
       const text = await this.app.vault.read(file);
       return new TextEncoder().encode(text);

@@ -97,14 +97,18 @@ async function pairedClient(base: string, pairingApprove: (id: string) => void) 
 }
 
 describe("attachment leftover policy", () => {
-  it("includes Word and spreadsheet leftovers and skips unknown types", () => {
+  it("includes common leftovers and skips unknown types", () => {
     expect(classifyAttachment("notes/brief.docx")).toBe("other");
     expect(classifyAttachment("notes/data.xlsx")).toBe("other");
     expect(skipReason("other", "brief.docx")).toBeUndefined();
     expect(skipReason("other", "data.xlsx")).toBeUndefined();
+    expect(skipReason("other", "slides.pptx")).toBeUndefined();
+    expect(skipReason("other", "notes.txt")).toBeUndefined();
     expect(skipReason("other", "archive.zip")).toBe("unsupported-type");
     expect(skipReason("pdf", "paper.pdf")).toBeUndefined();
-    expect(skipReason("audio", "talk.mp3")).toBe("audio-not-supported");
+    expect(skipReason("audio", "talk.mp3")).toBeUndefined();
+    expect(skipReason("audio", "talk.flac")).toBe("audio-not-supported");
+    expect(skipReason("video", "clip.mkv")).toBe("video-not-supported");
   });
 });
 
