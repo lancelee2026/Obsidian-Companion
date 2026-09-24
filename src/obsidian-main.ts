@@ -12,6 +12,7 @@ import {
   type PluginLicenseData
 } from "./index";
 import {detectLocale, interpolate, t, type Locale} from "./i18n";
+import {companionSiteUrl} from "./site";
 import type {ObsidianAppLike} from "./vault/obsidian";
 
 type PluginData = PluginLicenseData;
@@ -145,7 +146,28 @@ class NoteFerrySettingTab extends PluginSettingTab {
           void this.plugin.revokeAllClients().then(() => this.display());
         })
       );
+    addSiteSetting(containerEl, locale, "settingsHelp", "/help");
+    addSiteSetting(containerEl, locale, "settingsPrivacy", "/privacy");
+    addSiteSetting(containerEl, locale, "settingsContact", "/contact");
   }
+}
+
+function addSiteSetting(
+  containerEl: HTMLElement,
+  locale: Locale,
+  nameKey: "settingsHelp" | "settingsPrivacy" | "settingsContact",
+  path: string
+): void {
+  const url = companionSiteUrl(locale, path);
+  if (!url) return;
+  new Setting(containerEl)
+    .setName(t(nameKey, locale))
+    .addButton((button) =>
+      button.setButtonText(t("settingsOpen", locale)).onClick(() => {
+        const open = (globalThis as {open?: (href: string) => void}).open;
+        open?.(url);
+      })
+    );
 }
 
 function vaultSidecarPath(app: App): string | null {

@@ -12,6 +12,7 @@
 | Folder list | root/notes listing, attachmentCount, traversal rejected, truncated at show cap | Verified by `pnpm test` |
 | Oversized body | large pair request rejected | Verified by `pnpm test` |
 | Locale | Obsidian zh-TW maps to zh-Hant; Allow is 允許 | Verified by `pnpm test` |
+| Settings site links | empty `SITE_ORIGIN` omits Help / Privacy / Contact | Verified by `pnpm test` |
 | Vault trial merge | sidecar scope wins; count takes max; smaller POST is ignored | Verified by `pnpm test` |
 | Trial persist | clearing clients keeps trial fields; sidecar has no computer seat id | Verified by `pnpm test` |
 | Local license HTTP | authenticated GET/POST; smaller trialCount ignored | Verified by `pnpm test` |
@@ -24,6 +25,6 @@
 - macOS and Windows vault fixtures for path edge cases.
 - Community Plugin listing disclosure matches runtime.
 
-Current automated result: `pnpm test` (19), `pnpm typecheck`, and `pnpm build` (includes `dist/noteferry-companion.zip`) pass after the wider leftover allowlist and the 2 GB read ceiling.
+Current automated result: `pnpm test` (20), `pnpm typecheck`, and `pnpm build` (includes `dist/noteferry-companion.zip`) pass after Help / Privacy / Contact settings links (omitted while `SITE_ORIGIN` is empty).
 
 Do not mark live rows Verified from Node FakeVault tests alone.

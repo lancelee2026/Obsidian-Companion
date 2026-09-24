@@ -18,7 +18,11 @@ const copy = {
       "Connect the NoteFerry browser extension once. Access is read-only and will not change or damage your vault.",
     settingsAccess: "Browser access",
     settingsAccessHint: "Clear saved browser pairing on this computer.",
-    settingsDisconnect: "Disconnect browser"
+    settingsDisconnect: "Disconnect browser",
+    settingsHelp: "Help",
+    settingsPrivacy: "Privacy",
+    settingsContact: "Contact",
+    settingsOpen: "Open"
   },
   "zh-Hans": {
     pairTitle: "允许 NoteFerry？",
@@ -37,7 +41,11 @@ const copy = {
       "用 NoteFerry 浏览器扩展连接一次。只读访问，不会改动或损坏本地库。",
     settingsAccess: "浏览器访问",
     settingsAccessHint: "清除这台电脑上已保存的浏览器配对。",
-    settingsDisconnect: "断开浏览器"
+    settingsDisconnect: "断开浏览器",
+    settingsHelp: "帮助",
+    settingsPrivacy: "隐私",
+    settingsContact: "联系",
+    settingsOpen: "打开"
   },
   "zh-Hant": {
     pairTitle: "允許 NoteFerry？",
@@ -56,7 +64,11 @@ const copy = {
       "用 NoteFerry 瀏覽器擴充功能連線一次。唯讀存取，不會改動或損壞本機庫。",
     settingsAccess: "瀏覽器存取",
     settingsAccessHint: "清除這台電腦上已儲存的瀏覽器配對。",
-    settingsDisconnect: "中斷瀏覽器"
+    settingsDisconnect: "中斷瀏覽器",
+    settingsHelp: "說明",
+    settingsPrivacy: "隱私權",
+    settingsContact: "聯絡",
+    settingsOpen: "開啟"
   }
 } as const;
 
