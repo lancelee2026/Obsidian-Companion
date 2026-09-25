@@ -24,6 +24,7 @@
 - Server stops cleanly on plugin unload.
 - macOS and Windows vault fixtures for path edge cases.
 - Community Plugin listing disclosure matches runtime.
+- Ordinary Companion uninstall/reinstall (plugin folder only): pairing required again; this vault’s trial and shop key return; computer seat unchanged. Full dual-plugin matrix in [noteferry `e2e-cases.md`](https://github.com/lancelee2026/noteferry/blob/main/documentation/e2e-cases.md) D1–D8.
 
 Current automated result: `pnpm test` (20), `pnpm typecheck`, and `pnpm build` (includes `dist/noteferry-companion.zip`) pass after Help / Privacy / Contact settings links to `https://noteferry.dev`.
 

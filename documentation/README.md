@@ -16,6 +16,7 @@ This directory is the implementation authority for the Obsidian Companion. Statu
 | Extension ↔ Companion protocol | [`protocol.md`](protocol.md) |
 | Pairing, path, and logging defenses | [`security.md`](security.md) |
 | What has been tested? | [`tests.md`](tests.md) |
+| Dual-plugin uninstall/reinstall and full journey cases | [noteferry `documentation/e2e-cases.md`](https://github.com/lancelee2026/noteferry/blob/main/documentation/e2e-cases.md) |
 | Where to resume? | [`dev/agent-snapshot.md`](dev/agent-snapshot.md) |
 
 Chrome extension UI, provider attach, and `confirmAttached()` rules are owned by [noteferry](https://github.com/lancelee2026/noteferry). Keep `packages/protocol` aligned with that repo.
