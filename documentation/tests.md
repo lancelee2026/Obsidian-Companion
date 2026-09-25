@@ -25,6 +25,6 @@
 - macOS and Windows vault fixtures for path edge cases.
 - Community Plugin listing disclosure matches runtime.
 
-Current automated result: `pnpm test` (20), `pnpm typecheck`, and `pnpm build` (includes `dist/noteferry-companion.zip`) pass after Help / Privacy / Contact settings links (omitted while `SITE_ORIGIN` is empty).
+Current automated result: `pnpm test` (20), `pnpm typecheck`, and `pnpm build` (includes `dist/noteferry-companion.zip`) pass after Help / Privacy / Contact settings links to `https://noteferry.dev`.
 
 Do not mark live rows Verified from Node FakeVault tests alone.

@@ -6,8 +6,8 @@ Read `PRODUCT.md`, `documentation/README.md`, `documentation/system-design.md`, 
 
 ## Status
 
-- `Implemented`: HTTP companion, pairing, vault ports, plugin UI locale from Obsidian language (**en / zh-Hans / zh-Hant**), protocol package, folder list, attachment counts, wiki embeds via `getFirstLinkpathDest`, common leftovers included (Word, spreadsheet, slides, text, mp3/m4a/wav, mp4/webm/mov), reads rejected above 2 GB before load, vault trial watermark + computer seat file, `GET`/`POST /v1/local-license`, `pnpm build` also writes `dist/noteferry-companion.zip`. Settings Help / Privacy / Contact open the public site when `SITE_ORIGIN` is set and stay omitted when it is empty. Plugin **0.1.4**.
-- `Verified`: `pnpm typecheck`, `pnpm test` (20), `pnpm build` (includes `dist/noteferry-companion.zip`) after Help / Privacy / Contact settings links (omitted while `SITE_ORIGIN` is empty).
+- `Implemented`: HTTP companion, pairing, vault ports, plugin UI locale from Obsidian language (**en / zh-Hans / zh-Hant**), protocol package, folder list, attachment counts, wiki embeds via `getFirstLinkpathDest`, common leftovers included (Word, spreadsheet, slides, text, mp3/m4a/wav, mp4/webm/mov), reads rejected above 2 GB before load, vault trial watermark + computer seat file, `GET`/`POST /v1/local-license`, `pnpm build` also writes `dist/noteferry-companion.zip`. Settings Help / Privacy / Contact open `https://noteferry.dev`. Plugin **0.1.4**.
+- `Verified`: `pnpm typecheck`, `pnpm test` (20), `pnpm build` (includes `dist/noteferry-companion.zip`) after Help / Privacy / Contact settings links to `https://noteferry.dev`.
 - `Proposed`: Community Plugin listing. GitHub Release of the zip (human unless `gh` is authorized).
 - `Unverified`: live Obsidian Desktop restart self-heal after Allow; macOS/Windows release packaging; zip install path on a clean vault.
 

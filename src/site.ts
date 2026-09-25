@@ -1,7 +1,7 @@
 import type {Locale} from "./i18n";
 
-/** Public website origin. Empty until the domain exists. No trailing slash. */
-export const SITE_ORIGIN = "";
+/** Public site. No trailing slash. */
+export const SITE_ORIGIN = "https://noteferry.dev";
 
 function siteLocale(locale: Locale): "en" | "zh" | "zht" {
   if (locale === "zh-Hans") return "zh";
