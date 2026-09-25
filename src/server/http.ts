@@ -364,7 +364,7 @@ async function readJson(req: IncomingMessage): Promise<unknown> {
   const chunks: Buffer[] = [];
   let size = 0;
   for await (const chunk of req) {
-    const buf = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
+    const buf = chunkToBuffer(chunk);
     size += buf.byteLength;
     if (size > MAX_BODY_BYTES) {
       throw Object.assign(new Error("PAYLOAD_TOO_LARGE"), {httpStatus: 413});
@@ -377,6 +377,12 @@ async function readJson(req: IncomingMessage): Promise<unknown> {
   } catch {
     return null;
   }
+}
+
+function chunkToBuffer(chunk: string | Buffer | Uint8Array): Buffer {
+  if (Buffer.isBuffer(chunk)) return chunk;
+  if (typeof chunk === "string") return Buffer.from(chunk);
+  return Buffer.from(chunk);
 }
 
 function sendJson(res: ServerResponse, status: number, body: unknown): void {

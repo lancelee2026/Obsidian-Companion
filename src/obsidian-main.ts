@@ -181,5 +181,5 @@ function vaultSidecarPath(app: App): string | null {
 }
 
 function pluginLocale(): Locale {
-  return detectLocale(typeof getLanguage === "function" ? getLanguage() : "");
+  return detectLocale(getLanguage());
 }
