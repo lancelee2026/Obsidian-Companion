@@ -22,7 +22,7 @@ import {PROTOCOL_VERSION} from "@noteferry/protocol";
 
 export const COMPANION_HOST = "127.0.0.1";
 export const COMPANION_PORT = 27125;
-export const SERVICE_VERSION = "0.1.4";
+export const SERVICE_VERSION = "0.1.5";
 export const FOLDER_LIST_SCAN_MAX = 200;
 export const FOLDER_LIST_SHOW_MAX = 80;
 

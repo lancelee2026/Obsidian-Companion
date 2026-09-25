@@ -1,14 +1,10 @@
 import {PROTOCOL_VERSION, type CompanionStatusResponse} from "@noteferry/protocol";
 import {
   SERVICE_VERSION,
-  createMemoryPairingStore,
-  hashSecret,
-  normalizeVaultRelativePath,
   statusResponse,
   type PairingStore
 } from "./core";
 import {createCompanionServer, type CompanionServer} from "./server/http";
-import {FakeVault} from "./vault/fake";
 import {ObsidianVaultAdapter, type ObsidianAppLike} from "./vault/obsidian";
 import type {LocalLicensePort} from "./local-license";
 

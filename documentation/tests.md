@@ -26,6 +26,6 @@
 - Community Plugin listing disclosure matches runtime.
 - Ordinary Companion uninstall/reinstall (plugin folder only): pairing required again; this vault’s trial and shop key return; computer seat unchanged. Full dual-plugin matrix in [noteferry `e2e-cases.md`](https://github.com/lancelee2026/noteferry/blob/main/documentation/e2e-cases.md) D1–D8.
 
-Current automated result: `pnpm test` (20), `pnpm typecheck`, and `pnpm build` (includes `dist/noteferry-companion.zip`) pass after Help / Privacy / Contact settings links to `https://noteferry.dev`.
+Current automated result: `pnpm test` (20), `pnpm typecheck`, and `pnpm build` (includes `dist/noteferry-companion.zip`) pass after listing review Error fixes (`Setting.setHeading`, root `manifest.json` on `0.1.5`).
 
 Do not mark live rows Verified from Node FakeVault tests alone.

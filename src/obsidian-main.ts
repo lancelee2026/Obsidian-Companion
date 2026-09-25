@@ -1,5 +1,4 @@
-import {Plugin, Notice, Modal, Setting, App, PluginSettingTab} from "obsidian";
-import * as ObsidianApi from "obsidian";
+import {Plugin, Notice, Modal, Setting, App, PluginSettingTab, getLanguage} from "obsidian";
 import {
   createLicenseRuntime,
   createMemoryPairingStore,
@@ -71,10 +70,11 @@ export default class NoteFerryCompanionPlugin extends Plugin {
     this.addSettingTab(new NoteFerrySettingTab(this.app, this));
   }
 
-  override async onunload(): Promise<void> {
-    await this.server?.stop();
+  override onunload(): void {
+    const server = this.server;
     this.server = null;
     this.license = null;
+    if (server) void server.stop();
   }
 
   async revokeAllClients(): Promise<void> {
@@ -107,7 +107,7 @@ class PairRequestModal extends Modal {
     const locale = pluginLocale();
     const {contentEl} = this;
     contentEl.empty();
-    contentEl.createEl("h2", {text: t("pairTitle", locale)});
+    new Setting(contentEl).setName(t("pairTitle", locale)).setHeading();
     contentEl.createEl("p", {
       text: interpolate(t("pairBody", locale), this.clientName)
     });
@@ -136,8 +136,10 @@ class NoteFerrySettingTab extends PluginSettingTab {
     const locale = pluginLocale();
     const {containerEl} = this;
     containerEl.empty();
-    containerEl.createEl("h2", {text: t("settingsTitle", locale)});
-    containerEl.createEl("p", {text: t("settingsLead", locale)});
+    new Setting(containerEl)
+      .setName(t("settingsTitle", locale))
+      .setDesc(t("settingsLead", locale))
+      .setHeading();
     new Setting(containerEl)
       .setName(t("settingsAccess", locale))
       .setDesc(t("settingsAccessHint", locale))
@@ -164,33 +166,20 @@ function addSiteSetting(
     .setName(t(nameKey, locale))
     .addButton((button) =>
       button.setButtonText(t("settingsOpen", locale)).onClick(() => {
-        const open = (globalThis as {open?: (href: string) => void}).open;
-        open?.(url);
+        window.open(url);
       })
     );
 }
 
 function vaultSidecarPath(app: App): string | null {
-  const vault = app.vault as {adapter?: {getBasePath?: () => string}; configDir?: string};
-  const base = vault.adapter?.getBasePath?.();
-  if (!base) return null;
-  return sidecarPath(base, vault.configDir || ".obsidian");
+  const vault = app.vault;
+  const adapter = vault.adapter as {getBasePath?: () => string};
+  const base = adapter.getBasePath?.();
+  const configDir = vault.configDir;
+  if (!base || !configDir) return null;
+  return sidecarPath(base, configDir);
 }
 
 function pluginLocale(): Locale {
-  return detectLocale(obsidianLanguage());
-}
-
-function obsidianLanguage(): string {
-  const read = (ObsidianApi as {getLanguage?: () => string}).getLanguage;
-  if (typeof read === "function") return read();
-  const api = globalThis as {moment?: {locale?: () => string}};
-  try {
-    const fromStorage = localStorage.getItem("language");
-    if (fromStorage) return fromStorage;
-  } catch {
-    /* ignore */
-  }
-  if (typeof api.moment?.locale === "function") return api.moment.locale();
-  return "";
+  return detectLocale(typeof getLanguage === "function" ? getLanguage() : "");
 }

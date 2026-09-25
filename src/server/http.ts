@@ -57,9 +57,7 @@ export function createCompanionServer(options: CompanionServerOptions): Companio
     try {
       await route(req, res);
     } catch (error) {
-      const httpStatus = error && typeof error === "object" && "httpStatus" in error
-        ? Number((error as {httpStatus: unknown}).httpStatus)
-        : 500;
+      const httpStatus = errorHttpStatus(error);
       if (httpStatus === 413) {
         sendJson(res, 413, errorBody("PAYLOAD_TOO_LARGE", "Request is too large.", false));
         return;
@@ -118,9 +116,7 @@ export function createCompanionServer(options: CompanionServerOptions): Companio
 
     if (method === "POST" && url.pathname === "/v1/pair/status") {
       const body = await readJson(req);
-      const requestId = body && typeof body === "object" && "requestId" in body
-        ? String((body as {requestId: unknown}).requestId)
-        : "";
+      const requestId = fieldString(body, "requestId");
       if (!requestId) {
         sendJson(res, 400, errorBody("INVALID_REQUEST", "Missing request id.", false));
         return;
@@ -215,7 +211,7 @@ export function createCompanionServer(options: CompanionServerOptions): Companio
       try {
         sendJson(res, 200, await options.vault.listFolder({vaultRelativePath: path}));
       } catch (error) {
-        const code = error && typeof error === "object" && "code" in error ? String((error as {code: unknown}).code) : "";
+        const code = errorCode(error);
         if (code === "NOT_FOUND") {
           sendJson(res, 404, errorBody("NOT_FOUND", "Folder not found.", false));
           return;
@@ -262,7 +258,7 @@ export function createCompanionServer(options: CompanionServerOptions): Companio
         });
         res.end(Buffer.from(bytes));
       } catch (error) {
-        const code = error && typeof error === "object" && "code" in error ? String((error as {code: unknown}).code) : "";
+        const code = errorCode(error);
         if (code === "NOT_FOUND") {
           sendJson(res, 404, errorBody("NOT_FOUND", "File not found.", false));
           return;
@@ -326,6 +322,24 @@ export function createCompanionServer(options: CompanionServerOptions): Companio
   };
 }
 
+function errorHttpStatus(error: unknown): number {
+  if (!error || typeof error !== "object" || !("httpStatus" in error)) return 500;
+  const status = error.httpStatus;
+  return typeof status === "number" ? status : 500;
+}
+
+function errorCode(error: unknown): string {
+  if (!error || typeof error !== "object" || !("code" in error)) return "";
+  const code = error.code;
+  return typeof code === "string" ? code : "";
+}
+
+function fieldString(body: unknown, key: string): string {
+  if (!body || typeof body !== "object" || !(key in body)) return "";
+  const value = (body as Record<string, unknown>)[key];
+  return typeof value === "string" || typeof value === "number" ? String(value) : "";
+}
+
 function clientKey(req: IncomingMessage): string {
   return req.socket.remoteAddress ?? "unknown";
 }
@@ -342,7 +356,7 @@ function rateOk(buckets: Map<string, RateBucket>, key: string, limit: number, wi
   return true;
 }
 
-async function readJson(req: IncomingMessage): Promise<unknown | null> {
+async function readJson(req: IncomingMessage): Promise<unknown> {
   const contentType = req.headers["content-type"] ?? "";
   if (!contentType.includes("application/json")) {
     throw Object.assign(new Error("INVALID_REQUEST"), {httpStatus: 400});

@@ -96,7 +96,7 @@ export function deviceTokenPath(
   return join(env.XDG_CONFIG_HOME || join(home, ".config"), "noteferry", "device.json");
 }
 
-export function sidecarPath(vaultBase: string, configDir = ".obsidian"): string {
+export function sidecarPath(vaultBase: string, configDir: string): string {
   return join(vaultBase, configDir, SIDECAR_FILENAME);
 }
 
