@@ -39,6 +39,6 @@ pnpm typecheck
 pnpm test
 ```
 
-`pnpm build` writes `dist/main.js` and `dist/manifest.json`. Technical notes live in [`documentation/README.md`](documentation/README.md).
+`pnpm build` writes `dist/main.js` and `dist/manifest.json` from the repo-root `manifest.json`. Technical notes live in [`documentation/README.md`](documentation/README.md).
 
 This plugin is licensed under the [MIT License](LICENSE).

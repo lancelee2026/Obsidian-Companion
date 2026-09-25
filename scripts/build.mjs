@@ -18,7 +18,7 @@ await build({
   logLevel: "info"
 });
 
-await cp("obsidian/manifest.json", "dist/manifest.json");
+await cp("manifest.json", "dist/manifest.json");
 
 const vaultPlugin = process.env.NOTEFERRY_VAULT_PLUGIN
   ?? join(process.env.HOME ?? "", "Documents/Obsidian Vault/.obsidian/plugins/noteferry-companion");

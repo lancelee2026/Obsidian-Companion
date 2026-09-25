@@ -16,7 +16,7 @@
 | Vault trial merge | sidecar scope wins; count takes max; smaller POST is ignored | Verified by `pnpm test` |
 | Trial persist | clearing clients keeps trial fields; sidecar has no computer seat id | Verified by `pnpm test` |
 | Local license HTTP | authenticated GET/POST; smaller trialCount ignored | Verified by `pnpm test` |
-| Build | `dist/main.js` + `manifest.json` + `noteferry-companion.zip` | Verified by `pnpm build` |
+| Build | `dist/main.js` + `manifest.json` (from repo-root listing file) + `noteferry-companion.zip` | Verified by `pnpm build` |
 
 ## Live / packaging (`Unverified`)
 
