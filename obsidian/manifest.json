@@ -3,7 +3,7 @@
   "name": "NoteFerry Companion",
   "version": "0.1.4",
   "minAppVersion": "1.5.0",
-  "description": "Let the NoteFerry browser extension attach notes you choose to ChatGPT, Claude, or Gemini. 配合 NoteFerry 浏览器扩展使用，将你选择的笔记发送到 AI 对话中。",
+  "description": "Companion for the NoteFerry browser extension. It lets you attach notes you choose to ChatGPT, Claude, or Gemini. 作为 NoteFerry 浏览器扩展的伴侣插件，将你选择的笔记发送到 AI 对话中。",
   "author": "NoteFerry",
   "isDesktopOnly": true
 }
