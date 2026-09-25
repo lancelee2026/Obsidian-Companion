@@ -26,6 +26,6 @@
 - Community Plugin listing disclosure matches runtime.
 - Ordinary Companion uninstall/reinstall (plugin folder only): pairing required again; this vault’s trial and shop key return; computer seat unchanged. Full dual-plugin matrix in [noteferry `e2e-cases.md`](https://github.com/lancelee2026/noteferry/blob/main/documentation/e2e-cases.md) D1–D8.
 
-Current automated result: `pnpm test` (20), `pnpm typecheck`, and `pnpm build` pass after `0.1.8` listing-review Warning fixes (`window.setTimeout`, `getSettingDefinitions`, `chunkToBuffer`).
+Current automated result: `pnpm test` (20), `pnpm typecheck`, and `pnpm build` pass after `0.1.9` listing-review Error fix (`setWarning` + `display` only; no `setDestructive` / `getSettingDefinitions` / `update`).
 
 Do not mark live rows Verified from Node FakeVault tests alone.
