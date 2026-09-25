@@ -1,6 +1,6 @@
 # NoteFerry Companion
 
-NoteFerry Companion is the Obsidian Desktop plugin for [NoteFerry](https://noteferry.dev). NoteFerry is a browser extension. This plugin is the part that stays inside Obsidian.
+NoteFerry Companion is the Obsidian Desktop plugin for [NoteFerry](https://noteferry.dev). NoteFerry is a browser extension. This plugin stays inside Obsidian.
 
 Use it to add notes you choose from your vault into ChatGPT, Claude, or Gemini. The plugin only reads those notes. It does not edit or delete them.
 
@@ -29,16 +29,5 @@ NoteFerry Companion 是 [NoteFerry](https://noteferry.dev) 浏览器扩展在 Ob
 在 Obsidian 的社区插件中安装并启用后，从浏览器扩展里选择连接 Obsidian，并在提示中允许。之后可在对话的 **+** 菜单里选择从 Obsidian 添加。
 
 连接只发生在这台电脑上的 Obsidian 与 NoteFerry 扩展之间。笔记不会上传到 NoteFerry。没有账号，也没有遥测。只有当你把笔记加入正在使用的 AI 对话时，内容才会离开这台电脑。可在插件设置里断开浏览器。
-
-## Development
-
-```bash
-pnpm install
-pnpm build
-pnpm typecheck
-pnpm test
-```
-
-`pnpm build` writes `dist/main.js` and `dist/manifest.json` from the repo-root `manifest.json`. Technical notes live in [`documentation/README.md`](documentation/README.md).
 
 This plugin is licensed under the [MIT License](LICENSE).

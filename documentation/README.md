@@ -20,3 +20,15 @@ This directory is the implementation authority for the Obsidian Companion. Statu
 | Where to resume? | [`dev/agent-snapshot.md`](dev/agent-snapshot.md) |
 
 Chrome extension UI, provider attach, and `confirmAttached()` rules are owned by [noteferry](https://github.com/lancelee2026/noteferry). Keep `packages/protocol` aligned with that repo.
+
+## Development
+
+```bash
+pnpm install
+pnpm build
+pnpm typecheck
+pnpm test
+```
+
+`pnpm build` writes `dist/main.js` and `dist/manifest.json` from the repo-root `manifest.json`, and packs `dist/noteferry-companion.zip` without a system `zip` binary.
+
