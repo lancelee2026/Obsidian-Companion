@@ -1,4 +1,4 @@
-import {Plugin, Notice, Modal, Setting, App, PluginSettingTab, getLanguage} from "obsidian";
+import {Plugin, Notice, Modal, Setting, App, PluginSettingTab, getLanguage, type SettingDefinitionItem} from "obsidian";
 import {
   createLicenseRuntime,
   createMemoryPairingStore,
@@ -143,15 +143,57 @@ class NoteFerrySettingTab extends PluginSettingTab {
     new Setting(containerEl)
       .setName(t("settingsAccess", locale))
       .setDesc(t("settingsAccessHint", locale))
-      .addButton((button) =>
-        button.setButtonText(t("settingsDisconnect", locale)).setWarning().onClick(() => {
-          void this.plugin.revokeAllClients().then(() => this.display());
-        })
-      );
+      .addButton((button) => {
+        button.setButtonText(t("settingsDisconnect", locale));
+        if (typeof button.setDestructive === "function") button.setDestructive();
+        else button.setWarning();
+        button.onClick(() => {
+          void this.plugin.revokeAllClients().then(() => this.refreshSettings());
+        });
+      });
     addSiteSetting(containerEl, locale, "settingsHelp", "/help");
     addSiteSetting(containerEl, locale, "settingsPrivacy", "/privacy");
     addSiteSetting(containerEl, locale, "settingsContact", "/contact");
   }
+
+  override getSettingDefinitions(): SettingDefinitionItem[] {
+    const locale = pluginLocale();
+    const items: SettingDefinitionItem[] = [
+      {name: t("settingsTitle", locale), desc: t("settingsLead", locale)},
+      {
+        name: t("settingsAccess", locale),
+        desc: t("settingsAccessHint", locale),
+        action: () => {
+          void this.plugin.revokeAllClients().then(() => this.refreshSettings());
+        }
+      }
+    ];
+    pushSiteDefinition(items, locale, "settingsHelp", "/help");
+    pushSiteDefinition(items, locale, "settingsPrivacy", "/privacy");
+    pushSiteDefinition(items, locale, "settingsContact", "/contact");
+    return items;
+  }
+
+  refreshSettings(): void {
+    if (typeof this.update === "function") this.update();
+    else this.display();
+  }
+}
+
+function pushSiteDefinition(
+  items: SettingDefinitionItem[],
+  locale: Locale,
+  nameKey: "settingsHelp" | "settingsPrivacy" | "settingsContact",
+  path: string
+): void {
+  const url = companionSiteUrl(locale, path);
+  if (!url) return;
+  items.push({
+    name: t(nameKey, locale),
+    action: () => {
+      window.open(url);
+    }
+  });
 }
 
 function addSiteSetting(

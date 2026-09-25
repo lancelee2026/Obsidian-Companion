@@ -130,13 +130,23 @@ export async function readOrCreateDeviceToken(filePath: string, generateId: () =
     } catch {
       /* concurrent writer */
     }
-    await new Promise((resolve) => setTimeout(resolve, 25));
+    await delay(25);
   }
   const existing = parseDeviceToken(await readFile(filePath, "utf8").catch(() => ""));
   if (existing) return existing;
   const token = generateId();
   await writeFile(filePath, JSON.stringify({deviceToken: token}), "utf8");
   return token;
+}
+
+function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => {
+    if (typeof window !== "undefined") {
+      window.setTimeout(resolve, ms);
+      return;
+    }
+    queueMicrotask(resolve);
+  });
 }
 
 async function readSidecarFile(path: string): Promise<VaultLicenseFields | null> {
