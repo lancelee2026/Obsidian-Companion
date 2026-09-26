@@ -140,6 +140,7 @@ class NoteFerrySettingTab extends PluginSettingTab {
       .setName(t("settingsTitle", locale))
       .setDesc(t("settingsLead", locale))
       .setHeading();
+    addInstallSetting(containerEl, locale);
     new Setting(containerEl)
       .setName(t("settingsAccess", locale))
       .setDesc(t("settingsAccessHint", locale))
@@ -155,6 +156,19 @@ class NoteFerrySettingTab extends PluginSettingTab {
     addSiteSetting(containerEl, locale, "settingsPrivacy", "/privacy");
     addSiteSetting(containerEl, locale, "settingsContact", "/contact");
   }
+}
+
+function addInstallSetting(containerEl: HTMLElement, locale: Locale): void {
+  const url = companionSiteUrl(locale, "/install");
+  if (!url) return;
+  new Setting(containerEl)
+    .setName(t("settingsGetExtension", locale))
+    .setDesc(t("settingsGetExtensionHint", locale))
+    .addButton((button) =>
+      button.setButtonText(t("settingsGetExtensionCta", locale)).setCta().onClick(() => {
+        window.open(url);
+      })
+    );
 }
 
 function addSiteSetting(

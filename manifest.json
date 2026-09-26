@@ -1,9 +1,9 @@
 {
   "id": "noteferry-companion",
   "name": "NoteFerry Companion",
-  "version": "0.1.9",
+  "version": "0.1.10",
   "minAppVersion": "1.8.7",
-  "description": "Companion for the NoteFerry browser extension. Attach notes you choose to ChatGPT, Claude, or Gemini.",
+  "description": "Use with the NoteFerry browser extension. After enabling, open noteferry.dev to add notes in ChatGPT, Claude, or Gemini.",
   "author": "NoteFerry",
   "isDesktopOnly": true
 }

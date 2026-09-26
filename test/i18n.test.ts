@@ -14,5 +14,11 @@ describe("companion locale", () => {
     expect(t("allow", "en")).toBe("Allow");
     expect(interpolate(t("pairBody", "zh-Hans"), "NoteFerry")).toContain("只读");
     expect(t("pairBody", "zh-Hans")).not.toContain("离开这台电脑");
+    expect(t("noticeReadyNew", "en")).toContain("website");
+    expect(t("noticeReadyNew", "zh-Hans")).toContain("官网");
+    expect(t("settingsGetExtensionCta", "en")).toBe("Open the website");
+    expect(t("settingsGetExtensionCta", "zh-Hans")).toBe("打开官网");
+    expect(t("settingsGetExtensionHint", "en")).not.toMatch(/localhost|127\.0\.0\.1|port|token/i);
+    expect(t("settingsLead", "en") + t("noticeReadyNew", "en")).not.toMatch(/localhost|127\.0\.0\.1/i);
   });
 });

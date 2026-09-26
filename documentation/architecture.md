@@ -2,7 +2,7 @@
 
 ## Snapshot
 
-- **Implemented:** loopback HTTP server, pairing store with durable approved-client hashes (pending requests stay in memory), FakeVault tests, Obsidian vault adapter, plugin shell with Allow/Deny pairing UI, esbuild `dist/main.js` + `manifest.json` copied from the repo-root listing file, one-directory folder list, optional attachment counts, vault trial watermark plus computer seat file for license redeem.
+- **Implemented:** loopback HTTP server, pairing store with durable approved-client hashes (pending requests stay in memory), FakeVault tests, Obsidian vault adapter, plugin shell with Allow/Deny pairing UI, esbuild `dist/main.js` + `manifest.json` copied from the repo-root listing file, one-directory folder list, optional attachment counts, vault trial watermark plus computer seat file for license redeem. Settings open the website install page first, then Help / Privacy / Contact.
 - **Proposed:** deeper Obsidian packaging UX polish, store listing assets.
 - **Unverified:** live Obsidian Desktop on macOS/Windows, real-vault path edge cases beyond unit fixtures.
 
